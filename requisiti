@@ -1,0 +1,19 @@
+App etichettatura
+
+L'applicazione deve contenere un'interfaccia interattiva che permetta di associare labels a delle immagini. Si può usare OpenCV come libreria per immagini.
+
+All'avvio il programma richiede di creare un nuovo progetto, di specificare che operazione si intende fare (etichettatura, segmentazione, detection) e di indicare la directory dove si trovano le immagini da etichettare.
+
+La schermata principale deve contenere un riquadro che mostri l'immagine, una sezione che elenchi tutti i tipi di label (label1, label2, ...), un tasto che permetta di annullare l'ultima modifica e ripristinare la precedente etichetta ed eventualmente un tasto che permetta di inserire un nuovo custom label.
+
+Una volta selezionato il label da associare all'immagine il risultato viene scritto in un file ausiliario che mantiene le associazioni. Se il progetto viene temporaneamente chiuso, esso deve essere riapribile mantenendo i progressi effettuati. Ciò può essere fatto ad esempio salvando un oggetto C++ (contenente path della cartella e lista di associazioni img - label) su un file particolare, oppure mediante un file di testo. 
+
+Quando il progetto viene terminato il risultato viene salvato su un file di testo secondo una formattazione standard del tipo nome_img (space) label.
+
+Segmentazione
+
+Un'altra feature del programma consiste nel permettere di selezionare delle zone particolari sull'immagine e associarle a delle classi. Vi sono diversi pennelli di colori diversi, ognuno corrispondente ad una classe, e l'utente può colorare le zone interessate con i vari colori. Il programma costruisce autonomamente una nuova immagine di stesse dimensioni dell'input e la riempie con i valori associati alle classi indicate. L'output sarà una matrice di numeri o un'immagine lossless che dovrà essere salvata in qualche modo.
+
+Detection
+
+Simile al caso precedente, ma anzichè colorare l'utente racchiude in dei rettangoli delle zone dell'immagine che contengono un particolare elemento (esempio pedoni) e li associa ad una particolare classe.
