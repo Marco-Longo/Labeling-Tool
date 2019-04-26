@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "image.h"
 #include <QMainWindow>
 #include <QLabel>
 #include <QCommandLinkButton>
@@ -24,25 +25,29 @@ public:
     ~MainWindow();
     void InitImageFrame();
     void clearImgList();
+    void uncheckLabels();
+    void enableLabels();
 
 private:
     Ui::MainWindow *ui;
+    QButtonGroup *labels;
     QPushButton *dirSelectButton;
     QFileDialog *dirSelectDialog;
     QLineEdit *dirNameBox;
     QString imgDirectory;
-    QString currentImage;
     QLabel *imageLabel;
     QCommandLinkButton *forward, *backward;
-    QLinkedList<QPixmap> *images; //List of all the images in the directory
-    QLinkedList<QPixmap>::const_iterator iter; //Iterator for the images list
+    QLinkedList<Image> *images; //List of all the images in the directory
+    QLinkedList<Image>::const_iterator iter; //Iterator for the images list
     QHash<QString, QString> *imgLabels; //Associates an image name with a label
+    QHash<QString, QString> *labelsHistory; //History hasmap for imgLabels
 
 public slots:
     void NextImage();
     void PreviousImage();
     void SelectDir(QString dir);
     void AssociateLabel();
+    void Undo();
 };
 
 #endif // MAINWINDOW_H

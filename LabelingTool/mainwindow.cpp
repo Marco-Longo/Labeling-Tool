@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->b_label0, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label1, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label2, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
+    QObject::connect(ui->b_undo, SIGNAL(clicked()), this, SLOT(Undo()));
 
     dirSelectButton = new QPushButton(this);
     dirSelectButton->setFont(QFont("Ubuntu", 12));
@@ -24,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dirSelectButton, SIGNAL(clicked()), dirSelectDialog, SLOT(open()));
     QObject::connect(dirSelectDialog, SIGNAL(fileSelected(QString)), this, SLOT(SelectDir(QString)));
 
+    images = new QLinkedList<Image>();
+    imgLabels = new QHash<QString, QString>();
+    labelsHistory = new QHash<QString, QString>();
     InitImageFrame();
     QObject::connect(forward, SIGNAL(clicked()), this, SLOT(NextImage()));
     QObject::connect(backward, SIGNAL(clicked()), this, SLOT(PreviousImage()));
@@ -36,7 +40,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::InitImageFrame()
 {
-    images = new QLinkedList<QPixmap>();
     imageLabel = new QLabel(this);
     imageLabel->setStyleSheet("border: 2px solid gray");
     imageLabel->setGeometry(30,80,1024,768);
@@ -61,7 +64,8 @@ void MainWindow::NextImage()
         iter++;
         if(iter == images->end())
             iter = images->begin();
-        imageLabel->setPixmap(*iter);
+        imageLabel->setPixmap(iter->pic);
+        ui->b_undo->setEnabled(false);
     }
 }
 
@@ -73,7 +77,8 @@ void MainWindow::PreviousImage()
             iter = images->end()-1;
         else
             iter--;
-        imageLabel->setPixmap(*iter);
+        imageLabel->setPixmap(iter->pic);
+        ui->b_undo->setEnabled(false);
     }
 }
 
@@ -81,6 +86,13 @@ void MainWindow::clearImgList()
 {
     images->clear();
     imageLabel->setPixmap(QPixmap("./Assets/placeholder.jpg"));
+}
+
+void MainWindow::enableLabels()
+{
+    ui->b_label0->setEnabled(true);
+    ui->b_label1->setEnabled(true);
+    ui->b_label2->setEnabled(true);
 }
 
 void MainWindow::SelectDir(QString path)
@@ -94,26 +106,45 @@ void MainWindow::SelectDir(QString path)
         QFileInfo fi = dir->fileInfo();
         if(fi.completeSuffix() == "jpeg" || fi.completeSuffix() == "png" || fi.completeSuffix() == "jpg"
            || fi.completeSuffix() == "svg" || fi.completeSuffix() == "gif" || fi.completeSuffix() == "bmp")
-            images->append(dir->filePath());
+            images->append(Image(QPixmap(dir->filePath()), dir->fileName()));
         dir->next();
     }
+    enableLabels();
     iter = images->begin();
     if(!images->isEmpty())
-        imageLabel->setPixmap(*iter);
+        imageLabel->setPixmap(iter->pic);
 }
 
 void MainWindow::AssociateLabel()
 {
     if(images->isEmpty())
         return;
-    if(imgLabels == nullptr)
-        imgLabels = new QHash<QString, QString>();
 
     QObject *snd = QObject::sender();
     QString label = snd->objectName();
     label.remove(0, label.length()-1);
+    QString currentImage = QString(iter->path);
 
-    //TODO: find a way to always have currentImage up to date
-    imgLabels->insert(currentImage, label);
-    qDebug() << "Hash:" << currentImage << imgLabels->value(currentImage);
+    if(label != imgLabels->value(currentImage))
+    {
+        if(imgLabels->contains(currentImage))
+            labelsHistory->insert(currentImage, imgLabels->value(currentImage));
+        imgLabels->insert(currentImage, label);
+    }
+    ui->b_undo->setEnabled(true);
+
+    //qDebug() << "History Hash" << currentImage << (labelsHistory->contains(currentImage) ? labelsHistory->value(currentImage) : "empty");
+    //qDebug() << "Hash" << currentImage << (imgLabels->contains(currentImage) ? imgLabels->value(currentImage) : "empty");
 }
+
+void MainWindow::Undo()
+{
+    QString currentImage = QString(iter->path);
+    if(labelsHistory->contains(currentImage))
+        imgLabels->insert(currentImage, labelsHistory->value(currentImage));
+    else
+        imgLabels->remove(currentImage);
+    labelsHistory->remove(currentImage);
+}
+
+//TODO: new project/load project buttons; saving output on a txt file; saving project state (saving QHash+dirname object on a file)
