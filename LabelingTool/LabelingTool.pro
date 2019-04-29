@@ -27,14 +27,17 @@ CONFIG += c++11
 SOURCES += \
         image.cpp \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+        newproject.cpp
 
 HEADERS += \
         image.h \
-        mainwindow.h
+        mainwindow.h \
+        newproject.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+        newproject.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

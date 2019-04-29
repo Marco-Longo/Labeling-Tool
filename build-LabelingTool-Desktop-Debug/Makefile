@@ -52,11 +52,15 @@ OBJECTS_DIR   = ./
 
 SOURCES       = ../LabelingTool/image.cpp \
 		../LabelingTool/main.cpp \
-		../LabelingTool/mainwindow.cpp moc_mainwindow.cpp
+		../LabelingTool/mainwindow.cpp \
+		../LabelingTool/newproject.cpp moc_mainwindow.cpp \
+		moc_newproject.cpp
 OBJECTS       = image.o \
 		main.o \
 		mainwindow.o \
-		moc_mainwindow.o
+		newproject.o \
+		moc_mainwindow.o \
+		moc_newproject.o
 DIST          = ../../../../anaconda3/mkspecs/features/spec_pre.prf \
 		../../../../anaconda3/mkspecs/common/unix.conf \
 		../../../../anaconda3/mkspecs/common/linux.conf \
@@ -215,7 +219,6 @@ DIST          = ../../../../anaconda3/mkspecs/features/spec_pre.prf \
 		../../../../anaconda3/mkspecs/features/qt_config.prf \
 		../../../../anaconda3/mkspecs/linux-g++/qmake.conf \
 		../../../../anaconda3/mkspecs/features/spec_post.prf \
-		../LabelingTool/.qmake.stash \
 		../../../../anaconda3/mkspecs/features/exclusive_builds.prf \
 		../../../../anaconda3/mkspecs/features/toolchain.prf \
 		../../../../anaconda3/mkspecs/features/default_pre.prf \
@@ -236,9 +239,11 @@ DIST          = ../../../../anaconda3/mkspecs/features/spec_pre.prf \
 		../../../../anaconda3/mkspecs/features/yacc.prf \
 		../../../../anaconda3/mkspecs/features/lex.prf \
 		../LabelingTool/LabelingTool.pro ../LabelingTool/image.h \
-		../LabelingTool/mainwindow.h ../LabelingTool/image.cpp \
+		../LabelingTool/mainwindow.h \
+		../LabelingTool/newproject.h ../LabelingTool/image.cpp \
 		../LabelingTool/main.cpp \
-		../LabelingTool/mainwindow.cpp
+		../LabelingTool/mainwindow.cpp \
+		../LabelingTool/newproject.cpp
 QMAKE_TARGET  = LabelingTool
 DESTDIR       = 
 TARGET        = LabelingTool
@@ -247,7 +252,7 @@ TARGET        = LabelingTool
 first: all
 ####### Build rules
 
-$(TARGET): ui_mainwindow.h $(OBJECTS)  
+$(TARGET): ui_mainwindow.h ui_newproject.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: ../LabelingTool/LabelingTool.pro ../../../../anaconda3/mkspecs/linux-g++/qmake.conf ../../../../anaconda3/mkspecs/features/spec_pre.prf \
@@ -408,7 +413,6 @@ Makefile: ../LabelingTool/LabelingTool.pro ../../../../anaconda3/mkspecs/linux-g
 		../../../../anaconda3/mkspecs/features/qt_config.prf \
 		../../../../anaconda3/mkspecs/linux-g++/qmake.conf \
 		../../../../anaconda3/mkspecs/features/spec_post.prf \
-		.qmake.stash \
 		../../../../anaconda3/mkspecs/features/exclusive_builds.prf \
 		../../../../anaconda3/mkspecs/features/toolchain.prf \
 		../../../../anaconda3/mkspecs/features/default_pre.prf \
@@ -591,7 +595,6 @@ Makefile: ../LabelingTool/LabelingTool.pro ../../../../anaconda3/mkspecs/linux-g
 ../../../../anaconda3/mkspecs/features/qt_config.prf:
 ../../../../anaconda3/mkspecs/linux-g++/qmake.conf:
 ../../../../anaconda3/mkspecs/features/spec_post.prf:
-.qmake.stash:
 ../../../../anaconda3/mkspecs/features/exclusive_builds.prf:
 ../../../../anaconda3/mkspecs/features/toolchain.prf:
 ../../../../anaconda3/mkspecs/features/default_pre.prf:
@@ -630,9 +633,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../../../anaconda3/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../LabelingTool/image.h ../LabelingTool/mainwindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents ../LabelingTool/image.cpp ../LabelingTool/main.cpp ../LabelingTool/mainwindow.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents ../LabelingTool/mainwindow.ui $(DISTDIR)/
+	$(COPY_FILE) --parents ../LabelingTool/image.h ../LabelingTool/mainwindow.h ../LabelingTool/newproject.h $(DISTDIR)/
+	$(COPY_FILE) --parents ../LabelingTool/image.cpp ../LabelingTool/main.cpp ../LabelingTool/mainwindow.cpp ../LabelingTool/newproject.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents ../LabelingTool/mainwindow.ui ../LabelingTool/newproject.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -664,9 +667,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: ../../../../anaconda3/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -std=gnu++11 -Wall -W -dM -E -o moc_predefs.h ../../../../anaconda3/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_mainwindow.cpp
+compiler_moc_header_make_all: moc_mainwindow.cpp moc_newproject.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp
+	-$(DEL_FILE) moc_mainwindow.cpp moc_newproject.cpp
 moc_mainwindow.cpp: ../LabelingTool/image.h \
 		../../../../anaconda3/include/qt/QtGui/QPixmap \
 		../../../../anaconda3/include/qt/QtGui/qpixmap.h \
@@ -802,14 +805,124 @@ moc_mainwindow.cpp: ../LabelingTool/image.h \
 		../../../../anaconda3/bin/moc
 	/home/marco/anaconda3/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/marco/anaconda3/mkspecs/linux-g++ -I/home/marco/Scrivania/Università/Tirocinio/LabelingTool -I/home/marco/anaconda3/include/qt -I/home/marco/anaconda3/include/qt/QtWidgets -I/home/marco/anaconda3/include/qt/QtGui -I/home/marco/anaconda3/include/qt/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../LabelingTool/mainwindow.h -o moc_mainwindow.cpp
 
+moc_newproject.cpp: ../../../../anaconda3/include/qt/QtWidgets/QDialog \
+		../../../../anaconda3/include/qt/QtWidgets/qdialog.h \
+		../../../../anaconda3/include/qt/QtWidgets/qtwidgetsglobal.h \
+		../../../../anaconda3/include/qt/QtGui/qtguiglobal.h \
+		../../../../anaconda3/include/qt/QtCore/qglobal.h \
+		../../../../anaconda3/include/qt/QtCore/qconfig-bootstrapped.h \
+		../../../../anaconda3/include/qt/QtCore/qconfig.h \
+		../../../../anaconda3/include/qt/QtCore/qtcore-config.h \
+		../../../../anaconda3/include/qt/QtCore/qsystemdetection.h \
+		../../../../anaconda3/include/qt/QtCore/qprocessordetection.h \
+		../../../../anaconda3/include/qt/QtCore/qcompilerdetection.h \
+		../../../../anaconda3/include/qt/QtCore/qtypeinfo.h \
+		../../../../anaconda3/include/qt/QtCore/qsysinfo.h \
+		../../../../anaconda3/include/qt/QtCore/qlogging.h \
+		../../../../anaconda3/include/qt/QtCore/qflags.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic.h \
+		../../../../anaconda3/include/qt/QtCore/qbasicatomic.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic_bootstrap.h \
+		../../../../anaconda3/include/qt/QtCore/qgenericatomic.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic_cxx11.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic_msvc.h \
+		../../../../anaconda3/include/qt/QtCore/qglobalstatic.h \
+		../../../../anaconda3/include/qt/QtCore/qmutex.h \
+		../../../../anaconda3/include/qt/QtCore/qnumeric.h \
+		../../../../anaconda3/include/qt/QtCore/qversiontagging.h \
+		../../../../anaconda3/include/qt/QtGui/qtgui-config.h \
+		../../../../anaconda3/include/qt/QtWidgets/qtwidgets-config.h \
+		../../../../anaconda3/include/qt/QtWidgets/qwidget.h \
+		../../../../anaconda3/include/qt/QtGui/qwindowdefs.h \
+		../../../../anaconda3/include/qt/QtCore/qobjectdefs.h \
+		../../../../anaconda3/include/qt/QtCore/qnamespace.h \
+		../../../../anaconda3/include/qt/QtCore/qobjectdefs_impl.h \
+		../../../../anaconda3/include/qt/QtGui/qwindowdefs_win.h \
+		../../../../anaconda3/include/qt/QtCore/qobject.h \
+		../../../../anaconda3/include/qt/QtCore/qstring.h \
+		../../../../anaconda3/include/qt/QtCore/qchar.h \
+		../../../../anaconda3/include/qt/QtCore/qbytearray.h \
+		../../../../anaconda3/include/qt/QtCore/qrefcount.h \
+		../../../../anaconda3/include/qt/QtCore/qarraydata.h \
+		../../../../anaconda3/include/qt/QtCore/qstringbuilder.h \
+		../../../../anaconda3/include/qt/QtCore/qlist.h \
+		../../../../anaconda3/include/qt/QtCore/qalgorithms.h \
+		../../../../anaconda3/include/qt/QtCore/qiterator.h \
+		../../../../anaconda3/include/qt/QtCore/qhashfunctions.h \
+		../../../../anaconda3/include/qt/QtCore/qpair.h \
+		../../../../anaconda3/include/qt/QtCore/qbytearraylist.h \
+		../../../../anaconda3/include/qt/QtCore/qstringlist.h \
+		../../../../anaconda3/include/qt/QtCore/qregexp.h \
+		../../../../anaconda3/include/qt/QtCore/qstringmatcher.h \
+		../../../../anaconda3/include/qt/QtCore/qcoreevent.h \
+		../../../../anaconda3/include/qt/QtCore/qscopedpointer.h \
+		../../../../anaconda3/include/qt/QtCore/qmetatype.h \
+		../../../../anaconda3/include/qt/QtCore/qvarlengtharray.h \
+		../../../../anaconda3/include/qt/QtCore/qcontainerfwd.h \
+		../../../../anaconda3/include/qt/QtCore/qobject_impl.h \
+		../../../../anaconda3/include/qt/QtCore/qmargins.h \
+		../../../../anaconda3/include/qt/QtGui/qpaintdevice.h \
+		../../../../anaconda3/include/qt/QtCore/qrect.h \
+		../../../../anaconda3/include/qt/QtCore/qsize.h \
+		../../../../anaconda3/include/qt/QtCore/qpoint.h \
+		../../../../anaconda3/include/qt/QtGui/qpalette.h \
+		../../../../anaconda3/include/qt/QtGui/qcolor.h \
+		../../../../anaconda3/include/qt/QtGui/qrgb.h \
+		../../../../anaconda3/include/qt/QtGui/qrgba64.h \
+		../../../../anaconda3/include/qt/QtGui/qbrush.h \
+		../../../../anaconda3/include/qt/QtCore/qvector.h \
+		../../../../anaconda3/include/qt/QtGui/qmatrix.h \
+		../../../../anaconda3/include/qt/QtGui/qpolygon.h \
+		../../../../anaconda3/include/qt/QtGui/qregion.h \
+		../../../../anaconda3/include/qt/QtCore/qdatastream.h \
+		../../../../anaconda3/include/qt/QtCore/qiodevice.h \
+		../../../../anaconda3/include/qt/QtCore/qline.h \
+		../../../../anaconda3/include/qt/QtGui/qtransform.h \
+		../../../../anaconda3/include/qt/QtGui/qpainterpath.h \
+		../../../../anaconda3/include/qt/QtGui/qimage.h \
+		../../../../anaconda3/include/qt/QtGui/qpixelformat.h \
+		../../../../anaconda3/include/qt/QtGui/qpixmap.h \
+		../../../../anaconda3/include/qt/QtCore/qsharedpointer.h \
+		../../../../anaconda3/include/qt/QtCore/qshareddata.h \
+		../../../../anaconda3/include/qt/QtCore/qhash.h \
+		../../../../anaconda3/include/qt/QtCore/qsharedpointer_impl.h \
+		../../../../anaconda3/include/qt/QtGui/qfont.h \
+		../../../../anaconda3/include/qt/QtGui/qfontmetrics.h \
+		../../../../anaconda3/include/qt/QtGui/qfontinfo.h \
+		../../../../anaconda3/include/qt/QtWidgets/qsizepolicy.h \
+		../../../../anaconda3/include/qt/QtGui/qcursor.h \
+		../../../../anaconda3/include/qt/QtGui/qkeysequence.h \
+		../../../../anaconda3/include/qt/QtGui/qevent.h \
+		../../../../anaconda3/include/qt/QtCore/qvariant.h \
+		../../../../anaconda3/include/qt/QtCore/qmap.h \
+		../../../../anaconda3/include/qt/QtCore/qdebug.h \
+		../../../../anaconda3/include/qt/QtCore/qtextstream.h \
+		../../../../anaconda3/include/qt/QtCore/qlocale.h \
+		../../../../anaconda3/include/qt/QtCore/qset.h \
+		../../../../anaconda3/include/qt/QtCore/qcontiguouscache.h \
+		../../../../anaconda3/include/qt/QtCore/qurl.h \
+		../../../../anaconda3/include/qt/QtCore/qurlquery.h \
+		../../../../anaconda3/include/qt/QtCore/qfile.h \
+		../../../../anaconda3/include/qt/QtCore/qfiledevice.h \
+		../../../../anaconda3/include/qt/QtGui/qvector2d.h \
+		../../../../anaconda3/include/qt/QtGui/qtouchdevice.h \
+		../LabelingTool/newproject.h \
+		moc_predefs.h \
+		../../../../anaconda3/bin/moc
+	/home/marco/anaconda3/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/marco/anaconda3/mkspecs/linux-g++ -I/home/marco/Scrivania/Università/Tirocinio/LabelingTool -I/home/marco/anaconda3/include/qt -I/home/marco/anaconda3/include/qt/QtWidgets -I/home/marco/anaconda3/include/qt/QtGui -I/home/marco/anaconda3/include/qt/QtCore -I. -I/usr/include/c++/7 -I/usr/include/x86_64-linux-gnu/c++/7 -I/usr/include/c++/7/backward -I/usr/lib/gcc/x86_64-linux-gnu/7/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include ../LabelingTool/newproject.h -o moc_newproject.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_mainwindow.h
+compiler_uic_make_all: ui_mainwindow.h ui_newproject.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_mainwindow.h
+	-$(DEL_FILE) ui_mainwindow.h ui_newproject.h
 ui_mainwindow.h: ../LabelingTool/mainwindow.ui \
 		../../../../anaconda3/bin/uic
 	/home/marco/anaconda3/bin/uic ../LabelingTool/mainwindow.ui -o ui_mainwindow.h
+
+ui_newproject.h: ../LabelingTool/newproject.ui \
+		../../../../anaconda3/bin/uic
+	/home/marco/anaconda3/bin/uic ../LabelingTool/newproject.ui -o ui_newproject.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -1172,47 +1285,120 @@ mainwindow.o: ../LabelingTool/mainwindow.cpp ../LabelingTool/mainwindow.h \
 		../../../../anaconda3/include/qt/QtCore/QListIterator \
 		../../../../anaconda3/include/qt/QtCore/QDebug \
 		ui_mainwindow.h \
-		../../../../anaconda3/include/qt/QtCore/QVariant \
-		../../../../anaconda3/include/qt/QtWidgets/QAction \
-		../../../../anaconda3/include/qt/QtWidgets/qaction.h \
-		../../../../anaconda3/include/qt/QtWidgets/qactiongroup.h \
-		../../../../anaconda3/include/qt/QtWidgets/QApplication \
-		../../../../anaconda3/include/qt/QtWidgets/qapplication.h \
-		../../../../anaconda3/include/qt/QtCore/qcoreapplication.h \
-		../../../../anaconda3/include/qt/QtCore/qeventloop.h \
-		../../../../anaconda3/include/qt/QtWidgets/qdesktopwidget.h \
-		../../../../anaconda3/include/qt/QtGui/qguiapplication.h \
-		../../../../anaconda3/include/qt/QtGui/qinputmethod.h \
-		../../../../anaconda3/include/qt/QtWidgets/QButtonGroup \
-		../../../../anaconda3/include/qt/QtWidgets/qbuttongroup.h \
-		../../../../anaconda3/include/qt/QtWidgets/QHeaderView \
-		../../../../anaconda3/include/qt/QtWidgets/qheaderview.h \
-		../../../../anaconda3/include/qt/QtWidgets/qabstractitemview.h \
-		../../../../anaconda3/include/qt/QtWidgets/qabstractscrollarea.h \
-		../../../../anaconda3/include/qt/QtCore/qabstractitemmodel.h \
-		../../../../anaconda3/include/qt/QtCore/qitemselectionmodel.h \
-		../../../../anaconda3/include/qt/QtWidgets/qabstractitemdelegate.h \
-		../../../../anaconda3/include/qt/QtWidgets/qstyleoption.h \
-		../../../../anaconda3/include/qt/QtWidgets/qabstractspinbox.h \
-		../../../../anaconda3/include/qt/QtGui/qvalidator.h \
-		../../../../anaconda3/include/qt/QtCore/qregularexpression.h \
-		../../../../anaconda3/include/qt/QtWidgets/qslider.h \
-		../../../../anaconda3/include/qt/QtWidgets/qabstractslider.h \
-		../../../../anaconda3/include/qt/QtWidgets/qstyle.h \
-		../../../../anaconda3/include/qt/QtWidgets/qtabbar.h \
-		../../../../anaconda3/include/qt/QtWidgets/qrubberband.h \
-		../../../../anaconda3/include/qt/QtWidgets/QMenu \
-		../../../../anaconda3/include/qt/QtWidgets/qmenu.h \
-		../../../../anaconda3/include/qt/QtWidgets/QMenuBar \
-		../../../../anaconda3/include/qt/QtWidgets/qmenubar.h \
-		../../../../anaconda3/include/qt/QtWidgets/QPushButton \
-		../../../../anaconda3/include/qt/QtWidgets/QStatusBar \
-		../../../../anaconda3/include/qt/QtWidgets/qstatusbar.h \
-		../../../../anaconda3/include/qt/QtWidgets/QWidget
+		../LabelingTool/newproject.h \
+		../../../../anaconda3/include/qt/QtWidgets/QDialog
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o ../LabelingTool/mainwindow.cpp
+
+newproject.o: ../LabelingTool/newproject.cpp ../LabelingTool/newproject.h \
+		../../../../anaconda3/include/qt/QtWidgets/QDialog \
+		../../../../anaconda3/include/qt/QtWidgets/qdialog.h \
+		../../../../anaconda3/include/qt/QtWidgets/qtwidgetsglobal.h \
+		../../../../anaconda3/include/qt/QtGui/qtguiglobal.h \
+		../../../../anaconda3/include/qt/QtCore/qglobal.h \
+		../../../../anaconda3/include/qt/QtCore/qconfig-bootstrapped.h \
+		../../../../anaconda3/include/qt/QtCore/qconfig.h \
+		../../../../anaconda3/include/qt/QtCore/qtcore-config.h \
+		../../../../anaconda3/include/qt/QtCore/qsystemdetection.h \
+		../../../../anaconda3/include/qt/QtCore/qprocessordetection.h \
+		../../../../anaconda3/include/qt/QtCore/qcompilerdetection.h \
+		../../../../anaconda3/include/qt/QtCore/qtypeinfo.h \
+		../../../../anaconda3/include/qt/QtCore/qsysinfo.h \
+		../../../../anaconda3/include/qt/QtCore/qlogging.h \
+		../../../../anaconda3/include/qt/QtCore/qflags.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic.h \
+		../../../../anaconda3/include/qt/QtCore/qbasicatomic.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic_bootstrap.h \
+		../../../../anaconda3/include/qt/QtCore/qgenericatomic.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic_cxx11.h \
+		../../../../anaconda3/include/qt/QtCore/qatomic_msvc.h \
+		../../../../anaconda3/include/qt/QtCore/qglobalstatic.h \
+		../../../../anaconda3/include/qt/QtCore/qmutex.h \
+		../../../../anaconda3/include/qt/QtCore/qnumeric.h \
+		../../../../anaconda3/include/qt/QtCore/qversiontagging.h \
+		../../../../anaconda3/include/qt/QtGui/qtgui-config.h \
+		../../../../anaconda3/include/qt/QtWidgets/qtwidgets-config.h \
+		../../../../anaconda3/include/qt/QtWidgets/qwidget.h \
+		../../../../anaconda3/include/qt/QtGui/qwindowdefs.h \
+		../../../../anaconda3/include/qt/QtCore/qobjectdefs.h \
+		../../../../anaconda3/include/qt/QtCore/qnamespace.h \
+		../../../../anaconda3/include/qt/QtCore/qobjectdefs_impl.h \
+		../../../../anaconda3/include/qt/QtGui/qwindowdefs_win.h \
+		../../../../anaconda3/include/qt/QtCore/qobject.h \
+		../../../../anaconda3/include/qt/QtCore/qstring.h \
+		../../../../anaconda3/include/qt/QtCore/qchar.h \
+		../../../../anaconda3/include/qt/QtCore/qbytearray.h \
+		../../../../anaconda3/include/qt/QtCore/qrefcount.h \
+		../../../../anaconda3/include/qt/QtCore/qarraydata.h \
+		../../../../anaconda3/include/qt/QtCore/qstringbuilder.h \
+		../../../../anaconda3/include/qt/QtCore/qlist.h \
+		../../../../anaconda3/include/qt/QtCore/qalgorithms.h \
+		../../../../anaconda3/include/qt/QtCore/qiterator.h \
+		../../../../anaconda3/include/qt/QtCore/qhashfunctions.h \
+		../../../../anaconda3/include/qt/QtCore/qpair.h \
+		../../../../anaconda3/include/qt/QtCore/qbytearraylist.h \
+		../../../../anaconda3/include/qt/QtCore/qstringlist.h \
+		../../../../anaconda3/include/qt/QtCore/qregexp.h \
+		../../../../anaconda3/include/qt/QtCore/qstringmatcher.h \
+		../../../../anaconda3/include/qt/QtCore/qcoreevent.h \
+		../../../../anaconda3/include/qt/QtCore/qscopedpointer.h \
+		../../../../anaconda3/include/qt/QtCore/qmetatype.h \
+		../../../../anaconda3/include/qt/QtCore/qvarlengtharray.h \
+		../../../../anaconda3/include/qt/QtCore/qcontainerfwd.h \
+		../../../../anaconda3/include/qt/QtCore/qobject_impl.h \
+		../../../../anaconda3/include/qt/QtCore/qmargins.h \
+		../../../../anaconda3/include/qt/QtGui/qpaintdevice.h \
+		../../../../anaconda3/include/qt/QtCore/qrect.h \
+		../../../../anaconda3/include/qt/QtCore/qsize.h \
+		../../../../anaconda3/include/qt/QtCore/qpoint.h \
+		../../../../anaconda3/include/qt/QtGui/qpalette.h \
+		../../../../anaconda3/include/qt/QtGui/qcolor.h \
+		../../../../anaconda3/include/qt/QtGui/qrgb.h \
+		../../../../anaconda3/include/qt/QtGui/qrgba64.h \
+		../../../../anaconda3/include/qt/QtGui/qbrush.h \
+		../../../../anaconda3/include/qt/QtCore/qvector.h \
+		../../../../anaconda3/include/qt/QtGui/qmatrix.h \
+		../../../../anaconda3/include/qt/QtGui/qpolygon.h \
+		../../../../anaconda3/include/qt/QtGui/qregion.h \
+		../../../../anaconda3/include/qt/QtCore/qdatastream.h \
+		../../../../anaconda3/include/qt/QtCore/qiodevice.h \
+		../../../../anaconda3/include/qt/QtCore/qline.h \
+		../../../../anaconda3/include/qt/QtGui/qtransform.h \
+		../../../../anaconda3/include/qt/QtGui/qpainterpath.h \
+		../../../../anaconda3/include/qt/QtGui/qimage.h \
+		../../../../anaconda3/include/qt/QtGui/qpixelformat.h \
+		../../../../anaconda3/include/qt/QtGui/qpixmap.h \
+		../../../../anaconda3/include/qt/QtCore/qsharedpointer.h \
+		../../../../anaconda3/include/qt/QtCore/qshareddata.h \
+		../../../../anaconda3/include/qt/QtCore/qhash.h \
+		../../../../anaconda3/include/qt/QtCore/qsharedpointer_impl.h \
+		../../../../anaconda3/include/qt/QtGui/qfont.h \
+		../../../../anaconda3/include/qt/QtGui/qfontmetrics.h \
+		../../../../anaconda3/include/qt/QtGui/qfontinfo.h \
+		../../../../anaconda3/include/qt/QtWidgets/qsizepolicy.h \
+		../../../../anaconda3/include/qt/QtGui/qcursor.h \
+		../../../../anaconda3/include/qt/QtGui/qkeysequence.h \
+		../../../../anaconda3/include/qt/QtGui/qevent.h \
+		../../../../anaconda3/include/qt/QtCore/qvariant.h \
+		../../../../anaconda3/include/qt/QtCore/qmap.h \
+		../../../../anaconda3/include/qt/QtCore/qdebug.h \
+		../../../../anaconda3/include/qt/QtCore/qtextstream.h \
+		../../../../anaconda3/include/qt/QtCore/qlocale.h \
+		../../../../anaconda3/include/qt/QtCore/qset.h \
+		../../../../anaconda3/include/qt/QtCore/qcontiguouscache.h \
+		../../../../anaconda3/include/qt/QtCore/qurl.h \
+		../../../../anaconda3/include/qt/QtCore/qurlquery.h \
+		../../../../anaconda3/include/qt/QtCore/qfile.h \
+		../../../../anaconda3/include/qt/QtCore/qfiledevice.h \
+		../../../../anaconda3/include/qt/QtGui/qvector2d.h \
+		../../../../anaconda3/include/qt/QtGui/qtouchdevice.h \
+		ui_newproject.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o newproject.o ../LabelingTool/newproject.cpp
 
 moc_mainwindow.o: moc_mainwindow.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainwindow.o moc_mainwindow.cpp
+
+moc_newproject.o: moc_newproject.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_newproject.o moc_newproject.cpp
 
 ####### Install
 

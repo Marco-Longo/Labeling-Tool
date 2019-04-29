@@ -1,16 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "newproject.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    QObject::connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
+    this->setWindowIcon(QPixmap("./Assets/icon.png"));
     QObject::connect(ui->b_label0, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label1, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label2, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_undo, SIGNAL(clicked()), this, SLOT(Undo()));
+
+    QObject::connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
+    QObject::connect(ui->actionNew_Project, SIGNAL(triggered()), this, SLOT(CreateNewProject()));
 
     dirSelectButton = new QPushButton(this);
     dirSelectButton->setFont(QFont("Ubuntu", 12));
@@ -82,13 +86,13 @@ void MainWindow::PreviousImage()
     }
 }
 
-void MainWindow::clearImgList()
+void MainWindow::ClearImgList()
 {
     images->clear();
     imageLabel->setPixmap(QPixmap("./Assets/placeholder.jpg"));
 }
 
-void MainWindow::enableLabels()
+void MainWindow::EnableLabels()
 {
     ui->b_label0->setEnabled(true);
     ui->b_label1->setEnabled(true);
@@ -100,7 +104,7 @@ void MainWindow::SelectDir(QString path)
     imgDirectory = path;
     dirNameBox->setText(imgDirectory);
     QDirIterator *dir = new QDirIterator(imgDirectory, QDirIterator::Subdirectories);
-    clearImgList();
+    ClearImgList();
     while(dir->hasNext())
     {
         QFileInfo fi = dir->fileInfo();
@@ -109,7 +113,7 @@ void MainWindow::SelectDir(QString path)
             images->append(Image(QPixmap(dir->filePath()), dir->fileName()));
         dir->next();
     }
-    enableLabels();
+    EnableLabels();
     iter = images->begin();
     if(!images->isEmpty())
         imageLabel->setPixmap(iter->pic);
@@ -133,8 +137,8 @@ void MainWindow::AssociateLabel()
     }
     ui->b_undo->setEnabled(true);
 
-    //qDebug() << "History Hash" << currentImage << (labelsHistory->contains(currentImage) ? labelsHistory->value(currentImage) : "empty");
-    //qDebug() << "Hash" << currentImage << (imgLabels->contains(currentImage) ? imgLabels->value(currentImage) : "empty");
+    qDebug() << "History Hash" << currentImage << (labelsHistory->contains(currentImage) ? labelsHistory->value(currentImage) : "empty");
+    qDebug() << "Hash" << currentImage << (imgLabels->contains(currentImage) ? imgLabels->value(currentImage) : "empty");
 }
 
 void MainWindow::Undo()
@@ -147,4 +151,11 @@ void MainWindow::Undo()
     labelsHistory->remove(currentImage);
 }
 
-//TODO: new project/load project buttons; saving output on a txt file; saving project state (saving QHash+dirname object on a file)
+void MainWindow::CreateNewProject()
+{
+    NewProject *np = new NewProject();
+    np->exec();
+}
+
+//TODO: saving project state (saving QHash+dirname object on a file) + load project menù entry -> QDataStream+QFile;
+//      saving output on a txt file -> QTextStream+QFile

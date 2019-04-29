@@ -24,9 +24,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void InitImageFrame();
-    void clearImgList();
-    void uncheckLabels();
-    void enableLabels();
+    void ClearImgList();
+    void EnableLabels();
 
 private:
     Ui::MainWindow *ui;
@@ -48,6 +47,7 @@ public slots:
     void SelectDir(QString dir);
     void AssociateLabel();
     void Undo();
+    void CreateNewProject();
 };
 
 #endif // MAINWINDOW_H
