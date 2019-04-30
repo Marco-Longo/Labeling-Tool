@@ -15,11 +15,13 @@ class NewProject : public QDialog
 public:
     explicit NewProject(QWidget *parent = nullptr);
     ~NewProject();
+    QString FullPath();
 
 private:
     Ui::NewProject *ui;
     QFileDialog *dirSelectDialog;
     QString projDirectory;
+    QString projFullPath;
 public slots:
     void SelectDir(QString);
     void CreateProj();

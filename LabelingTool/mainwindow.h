@@ -26,6 +26,7 @@ public:
     void InitImageFrame();
     void ClearImgList();
     void EnableLabels();
+    void UpdateCurrLabel(QString);
 
 private:
     Ui::MainWindow *ui;
@@ -40,6 +41,10 @@ private:
     QLinkedList<Image>::const_iterator iter; //Iterator for the images list
     QHash<QString, QString> *imgLabels; //Associates an image name with a label
     QHash<QString, QString> *labelsHistory; //History hasmap for imgLabels
+    QString projectPath;
+    QLabel *currentLabel;
+    QPushButton *lastLabelButton;
+    QLinkedList<QPushButton *> *additionalLabelButtons;
 
 public slots:
     void NextImage();
@@ -48,6 +53,7 @@ public slots:
     void AssociateLabel();
     void Undo();
     void CreateNewProject();
+    void AddLabel();
 };
 
 #endif // MAINWINDOW_H

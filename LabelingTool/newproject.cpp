@@ -29,7 +29,13 @@ void NewProject::CreateProj()
 {
     QString projName = ui->txtbox_name->text();
     QString projDir = ui->txtbox_dir->text();
+    projFullPath = projDir + "/" + projName;
 
     QDir *dir = new QDir();
-    dir->mkdir(projDir + "/" + projName);
+    dir->mkdir(projFullPath);
+}
+
+QString NewProject::FullPath()
+{
+    return projFullPath;
 }
