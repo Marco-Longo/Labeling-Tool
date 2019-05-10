@@ -19,6 +19,7 @@
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
+#include <QtWidgets/QToolButton>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -37,6 +38,8 @@ public:
     QPushButton *b_label2;
     QPushButton *b_addlabel;
     QPushButton *b_undo;
+    QPushButton *b_removelabel;
+    QToolButton *b_editlabels;
     QMenuBar *menuBar;
     QMenu *menuMen;
     QStatusBar *statusBar;
@@ -46,6 +49,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->resize(1980, 1024);
+        MainWindow->setToolButtonStyle(Qt::ToolButtonFollowStyle);
         actionQuit = new QAction(MainWindow);
         actionQuit->setObjectName(QStringLiteral("actionQuit"));
         QFont font;
@@ -59,9 +63,11 @@ public:
         actionLoad_Project->setFont(font);
         actionSave_Project = new QAction(MainWindow);
         actionSave_Project->setObjectName(QStringLiteral("actionSave_Project"));
+        actionSave_Project->setEnabled(false);
         actionSave_Project->setFont(font);
         actionFinalize_Project = new QAction(MainWindow);
         actionFinalize_Project->setObjectName(QStringLiteral("actionFinalize_Project"));
+        actionFinalize_Project->setEnabled(false);
         actionFinalize_Project->setFont(font);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -85,11 +91,23 @@ public:
         b_label2->setAutoExclusive(false);
         b_addlabel = new QPushButton(centralWidget);
         b_addlabel->setObjectName(QStringLiteral("b_addlabel"));
-        b_addlabel->setGeometry(QRect(1120, 780, 190, 40));
+        b_addlabel->setGeometry(QRect(1120, 780, 90, 40));
+        QIcon icon;
+        icon.addFile(QStringLiteral("../build-LabelingTool-Desktop-Debug/Assets/add.svg"), QSize(), QIcon::Normal, QIcon::Off);
+        b_addlabel->setIcon(icon);
         b_undo = new QPushButton(centralWidget);
         b_undo->setObjectName(QStringLiteral("b_undo"));
         b_undo->setEnabled(false);
         b_undo->setGeometry(QRect(1120, 720, 190, 40));
+        b_removelabel = new QPushButton(centralWidget);
+        b_removelabel->setObjectName(QStringLiteral("b_removelabel"));
+        b_removelabel->setGeometry(QRect(1220, 780, 90, 40));
+        QIcon icon1;
+        icon1.addFile(QStringLiteral("../build-LabelingTool-Desktop-Debug/Assets/remove.svg"), QSize(), QIcon::Normal, QIcon::Off);
+        b_removelabel->setIcon(icon1);
+        b_editlabels = new QToolButton(centralWidget);
+        b_editlabels->setObjectName(QStringLiteral("b_editlabels"));
+        b_editlabels->setGeometry(QRect(1320, 70, 21, 21));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -130,11 +148,16 @@ public:
         b_label0->setText(QApplication::translate("MainWindow", "Label 0", Q_NULLPTR));
         b_label1->setText(QApplication::translate("MainWindow", "Label 1", Q_NULLPTR));
         b_label2->setText(QApplication::translate("MainWindow", "Label 2", Q_NULLPTR));
-        b_addlabel->setText(QApplication::translate("MainWindow", "Add Label", Q_NULLPTR));
+        b_addlabel->setText(QApplication::translate("MainWindow", "   Label", Q_NULLPTR));
 #ifndef QT_NO_TOOLTIP
         b_undo->setToolTip(QApplication::translate("MainWindow", "Reverts to previously selected label", Q_NULLPTR));
 #endif // QT_NO_TOOLTIP
         b_undo->setText(QApplication::translate("MainWindow", "Undo", Q_NULLPTR));
+        b_removelabel->setText(QApplication::translate("MainWindow", "   Label", Q_NULLPTR));
+#ifndef QT_NO_TOOLTIP
+        b_editlabels->setToolTip(QApplication::translate("MainWindow", "Edit labels names", Q_NULLPTR));
+#endif // QT_NO_TOOLTIP
+        b_editlabels->setText(QApplication::translate("MainWindow", "...", Q_NULLPTR));
         menuMen->setTitle(QApplication::translate("MainWindow", "Men\303\271", Q_NULLPTR));
     } // retranslateUi
 

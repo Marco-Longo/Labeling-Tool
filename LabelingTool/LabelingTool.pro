@@ -26,16 +26,21 @@ CONFIG += c++11
 
 SOURCES += \
         image.cpp \
+        labeleditor.cpp \
         main.cpp \
         mainwindow.cpp \
-        newproject.cpp
+        newproject.cpp \
+        storedata.cpp
 
 HEADERS += \
         image.h \
+        labeleditor.h \
         mainwindow.h \
-        newproject.h
+        newproject.h \
+        storedata.h
 
 FORMS += \
+        labeleditor.ui \
         mainwindow.ui \
         newproject.ui
 

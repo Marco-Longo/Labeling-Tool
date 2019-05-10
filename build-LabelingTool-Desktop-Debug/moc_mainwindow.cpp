@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[10];
-    char stringdata0[96];
+    QByteArrayData data[15];
+    char stringdata0[159];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -40,12 +40,19 @@ QT_MOC_LITERAL(5, 46, 3), // "dir"
 QT_MOC_LITERAL(6, 50, 14), // "AssociateLabel"
 QT_MOC_LITERAL(7, 65, 4), // "Undo"
 QT_MOC_LITERAL(8, 70, 16), // "CreateNewProject"
-QT_MOC_LITERAL(9, 87, 8) // "AddLabel"
+QT_MOC_LITERAL(9, 87, 8), // "AddLabel"
+QT_MOC_LITERAL(10, 96, 11), // "RemoveLabel"
+QT_MOC_LITERAL(11, 108, 10), // "EditLabels"
+QT_MOC_LITERAL(12, 119, 15), // "FinalizeProject"
+QT_MOC_LITERAL(13, 135, 11), // "SaveProject"
+QT_MOC_LITERAL(14, 147, 11) // "LoadProject"
 
     },
     "MainWindow\0NextImage\0\0PreviousImage\0"
     "SelectDir\0dir\0AssociateLabel\0Undo\0"
-    "CreateNewProject\0AddLabel"
+    "CreateNewProject\0AddLabel\0RemoveLabel\0"
+    "EditLabels\0FinalizeProject\0SaveProject\0"
+    "LoadProject"
 };
 #undef QT_MOC_LITERAL
 
@@ -55,7 +62,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+      12,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -63,18 +70,28 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   49,    2, 0x0a /* Public */,
-       3,    0,   50,    2, 0x0a /* Public */,
-       4,    1,   51,    2, 0x0a /* Public */,
-       6,    0,   54,    2, 0x0a /* Public */,
-       7,    0,   55,    2, 0x0a /* Public */,
-       8,    0,   56,    2, 0x0a /* Public */,
-       9,    0,   57,    2, 0x0a /* Public */,
+       1,    0,   74,    2, 0x0a /* Public */,
+       3,    0,   75,    2, 0x0a /* Public */,
+       4,    1,   76,    2, 0x0a /* Public */,
+       6,    0,   79,    2, 0x0a /* Public */,
+       7,    0,   80,    2, 0x0a /* Public */,
+       8,    0,   81,    2, 0x0a /* Public */,
+       9,    0,   82,    2, 0x0a /* Public */,
+      10,    0,   83,    2, 0x0a /* Public */,
+      11,    0,   84,    2, 0x0a /* Public */,
+      12,    0,   85,    2, 0x0a /* Public */,
+      13,    0,   86,    2, 0x0a /* Public */,
+      14,    0,   87,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::QString,    5,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -96,6 +113,11 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 4: _t->Undo(); break;
         case 5: _t->CreateNewProject(); break;
         case 6: _t->AddLabel(); break;
+        case 7: _t->RemoveLabel(); break;
+        case 8: _t->EditLabels(); break;
+        case 9: _t->FinalizeProject(); break;
+        case 10: _t->SaveProject(); break;
+        case 11: _t->LoadProject(); break;
         default: ;
         }
     }
@@ -126,13 +148,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 12;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 12)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 7;
+        _id -= 12;
     }
     return _id;
 }

@@ -54,6 +54,11 @@ public slots:
     void Undo();
     void CreateNewProject();
     void AddLabel();
+    void RemoveLabel();
+    void EditLabels();
+    void FinalizeProject();
+    void SaveProject();
+    void LoadProject();
 };
 
 #endif // MAINWINDOW_H

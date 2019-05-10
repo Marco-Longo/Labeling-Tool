@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "newproject.h"
+#include "labeleditor.h"
+#include "storedata.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -12,11 +14,16 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->b_label1, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label2, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_addlabel, SIGNAL(clicked()), this, SLOT(AddLabel()));
+    QObject::connect(ui->b_removelabel, SIGNAL(clicked()), this, SLOT(RemoveLabel()));
+    QObject::connect(ui->b_editlabels, SIGNAL(clicked()), this, SLOT(EditLabels()));
     QObject::connect(ui->b_undo, SIGNAL(clicked()), this, SLOT(Undo()));
     lastLabelButton = ui->b_label2;
 
     QObject::connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
     QObject::connect(ui->actionNew_Project, SIGNAL(triggered()), this, SLOT(CreateNewProject()));
+    QObject::connect(ui->actionFinalize_Project, SIGNAL(triggered()), this, SLOT(FinalizeProject()));
+    QObject::connect(ui->actionSave_Project, SIGNAL(triggered()), this, SLOT(SaveProject()));
+    QObject::connect(ui->actionLoad_Project, SIGNAL(triggered()), this, SLOT(LoadProject()));
 
     dirSelectButton = new QPushButton(this);
     dirSelectButton->setFont(QFont("Ubuntu", 12));
@@ -126,15 +133,21 @@ void MainWindow::SelectDir(QString path)
     dirNameBox->setText(imgDirectory);
     QDirIterator *dir = new QDirIterator(imgDirectory, QDirIterator::Subdirectories);
     ClearImgList();
+
+    bool containsImgs = false;
     while(dir->hasNext())
     {
         QFileInfo fi = dir->fileInfo();
         if(fi.completeSuffix() == "jpeg" || fi.completeSuffix() == "png" || fi.completeSuffix() == "jpg"
            || fi.completeSuffix() == "svg" || fi.completeSuffix() == "gif" || fi.completeSuffix() == "bmp")
+          {
             images->append(Image(QPixmap(dir->filePath()), dir->fileName()));
+            containsImgs = true;
+          }
         dir->next();
     }
-    EnableLabels();
+    if(containsImgs)
+        EnableLabels();
     iter = images->begin();
     if(!images->isEmpty())
         imageLabel->setPixmap(iter->pic);
@@ -191,12 +204,16 @@ void MainWindow::CreateNewProject()
     NewProject *np = new NewProject();
     np->exec();
     projectPath = np->FullPath();
+    ui->actionFinalize_Project->setEnabled(true);
+    ui->actionSave_Project->setEnabled(true);
     if(projectPath != "")
         this->setWindowTitle("LabelingTool  -  " + projectPath);
 }
 
 void MainWindow::AddLabel()
 {
+    if(images->isEmpty())
+        return;
     if(additionalLabelButtons->count() == 8)
         return;
 
@@ -206,12 +223,105 @@ void MainWindow::AddLabel()
     newButton -> setGeometry(loc.x(), loc.y(), 190, 40);
     newButton -> setText("New Label");
     newButton -> setObjectName("b_label" + QString::number(additionalLabelButtons->count()+3));
+    newButton -> show();
     additionalLabelButtons->push_back(newButton);
-    newButton->show();
+
     QObject::connect(newButton, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     lastLabelButton = additionalLabelButtons->last();
 }
 
+void MainWindow::RemoveLabel()
+{
+    if(additionalLabelButtons->isEmpty())
+        return;
+    QPushButton *button = lastLabelButton;
+    button -> hide();
+    additionalLabelButtons->pop_back();
+    if(!additionalLabelButtons->isEmpty())
+        lastLabelButton = additionalLabelButtons->last();
+    else
+        lastLabelButton = ui->b_label2;
+}
+
+void MainWindow::EditLabels()
+{
+    LabelEditor *labEdit = new LabelEditor();
+    std::vector<QPushButton *> *editingList = new std::vector<QPushButton *>();
+    editingList->push_back(ui->b_label0);
+    editingList->push_back(ui->b_label1);
+    editingList->push_back(ui->b_label2);
+    if(!additionalLabelButtons->isEmpty())
+        for(int i=3; i<additionalLabelButtons->count()+3; i++)
+        {
+            QString nextButton = "b_label";
+            nextButton += QString::number(i);
+            editingList->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindDirectChildrenOnly));
+            nextButton = "b_label";
+        }
+    labEdit->setDimension(editingList->size());
+    labEdit->exec();
+    if(!labEdit->Ready())
+        return;
+
+    for(int i=0; i<int(editingList->size()); i++)
+    {
+        if(labEdit->getEntry(i) != "")
+            editingList->at(static_cast<std::make_unsigned<decltype(i)>::type>(i)) -> setText(labEdit->getEntry(i));
+    }
+}
+
+void MainWindow::FinalizeProject()
+{
+    if(projectPath == "" || images->isEmpty())
+        return;
+
+    QString filename = projectPath + "/labels.txt";
+    QFile file(filename);
+
+    if(file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        QTextStream stream(&file);
+        for(iter = images->begin(); iter != images->end(); iter++)
+        {
+            stream << iter->path;
+            stream << " ";
+            if(imgLabels->value(iter->path) != "")
+                stream << imgLabels->value(iter->path);
+            else
+                stream << "NoLabel";
+            stream << endl;
+        }
+    }
+}
+
+void MainWindow::SaveProject()
+{
+    if(projectPath == "" || images->isEmpty())
+        return;
+
+    StoreData *data = new StoreData(imgDirectory, imgLabels, labelsHistory);
+    QString filename = projectPath + "/projdata.dat";
+    QFile file(filename);
+    if(file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        QDataStream out(&file);
+        out << QString(data->getDirectory());
+        //Save QHashes
+    }
+}
+
+void MainWindow::LoadProject()
+{
+    //Just a debugging code
+    QString filename = projectPath + "/projdata.dat";
+    QFile file(filename);
+    if(file.open(QIODevice::ReadOnly))
+    {
+        QDataStream in(&file);
+        QString str;
+        in >> str;
+        qDebug() << str << endl;
+    }
+}
+
 //TODO: saving project state (saving QHash+dirname object on a file) + load project menù entry -> QDataStream+QFile;
-//      saving output on a txt file -> QTextStream+QFile
-//      editing label names
