@@ -260,7 +260,6 @@ void MainWindow::EditLabels()
             QString nextButton = "b_label";
             nextButton += QString::number(i);
             editingList->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindDirectChildrenOnly));
-            nextButton = "b_label";
         }
     labEdit->setDimension(editingList->size());
     labEdit->exec();
@@ -303,7 +302,19 @@ void MainWindow::SaveProject()
     if(projectPath == "" || images->isEmpty())
         return;
 
-    StoreData *data = new StoreData(imgDirectory, imgLabels, labelsHistory);
+    QVector<QString>* buttons = new QVector<QString>();
+    buttons->push_back(ui->b_label0->text());
+    buttons->push_back(ui->b_label1->text());
+    buttons->push_back(ui->b_label2->text());
+    if(!additionalLabelButtons->isEmpty())
+        for(int i=3; i<additionalLabelButtons->count()+3; i++)
+        {
+            QString nextButton = "b_label";
+            nextButton += QString::number(i);
+            buttons->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindDirectChildrenOnly)->text());
+        }
+
+    StoreData *data = new StoreData(imgDirectory, imgLabels, labelsHistory, buttons);
     QString filename = projectPath + "/projdata.dat";
     QFile file(filename);
     if(file.open(QIODevice::WriteOnly | QIODevice::Truncate))
@@ -312,6 +323,7 @@ void MainWindow::SaveProject()
         out << QString(data->getDirectory());
         out << QHash<QString, QString>(*(data->getLabels()));
         out << QHash<QString, QString>(*(data->getHistory()));
+        out << QVector<QString>(*(data->getButtons()));
     }
 }
 
@@ -349,17 +361,36 @@ void MainWindow::LoadProject(QString path)
         QHash<QString, QString> *htmp = new QHash<QString, QString>();
         in >> *htmp;
         data->setHistory(htmp);
+
+        QVector<QString> *btmp = new QVector<QString>();
+        in >> *btmp;
+        data->setButtons(btmp);
     }
 
     SelectDir(data->getDirectory());
     imgLabels = data->getLabels();
     labelsHistory = data->getHistory();
+    LoadLabelButtons(data->getButtons());
 
     if(imgLabels->value(iter->path) != "")
         currentLabel->setText(imgLabels->value(iter->path));
     else
         currentLabel->setText("NoLabel");
 
+    ui->b_undo->setEnabled(true);
     ui->actionFinalize_Project->setEnabled(true);
     ui->actionSave_Project->setEnabled(true);
+}
+
+void MainWindow::LoadLabelButtons(QVector<QString>* buttons)
+{
+    ui->b_label0->setText(buttons->at(0));
+    ui->b_label1->setText(buttons->at(1));
+    ui->b_label2->setText(buttons->at(2));
+    for(int i=3; i<buttons->count(); i++)
+    {
+        AddLabel();
+        QString buttonName = "b_label" + QString::number(i);
+        this->centralWidget()->findChild<QPushButton *>(buttonName, Qt::FindDirectChildrenOnly)->setText(buttons->at(i));
+    }
 }

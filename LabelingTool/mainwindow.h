@@ -27,6 +27,7 @@ public:
     void ClearImgList();
     void EnableLabels();
     void UpdateCurrLabel(QString);
+    void LoadLabelButtons(QVector<QString>*);
 
 private:
     Ui::MainWindow *ui;
