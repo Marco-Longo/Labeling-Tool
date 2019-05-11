@@ -30,7 +30,6 @@ public:
 
 private:
     Ui::MainWindow *ui;
-    QButtonGroup *labels;
     QPushButton *dirSelectButton;
     QFileDialog *dirSelectDialog;
     QLineEdit *dirNameBox;
@@ -45,6 +44,7 @@ private:
     QLabel *currentLabel;
     QPushButton *lastLabelButton;
     QLinkedList<QPushButton *> *additionalLabelButtons;
+    QFileDialog *loadDialog;
 
 public slots:
     void NextImage();
@@ -58,7 +58,7 @@ public slots:
     void EditLabels();
     void FinalizeProject();
     void SaveProject();
-    void LoadProject();
+    void LoadProject(QString);
 };
 
 #endif // MAINWINDOW_H

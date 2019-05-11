@@ -23,7 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(ui->actionNew_Project, SIGNAL(triggered()), this, SLOT(CreateNewProject()));
     QObject::connect(ui->actionFinalize_Project, SIGNAL(triggered()), this, SLOT(FinalizeProject()));
     QObject::connect(ui->actionSave_Project, SIGNAL(triggered()), this, SLOT(SaveProject()));
-    QObject::connect(ui->actionLoad_Project, SIGNAL(triggered()), this, SLOT(LoadProject()));
+
+    loadDialog = new QFileDialog(this);
+    loadDialog->setFileMode(QFileDialog::DirectoryOnly);
+    QObject::connect(ui->actionLoad_Project, SIGNAL(triggered()), loadDialog, SLOT(open()));
+    QObject::connect(loadDialog, SIGNAL(fileSelected(QString)), this, SLOT(LoadProject(QString)));
 
     dirSelectButton = new QPushButton(this);
     dirSelectButton->setFont(QFont("Ubuntu", 12));
@@ -306,22 +310,56 @@ void MainWindow::SaveProject()
     {
         QDataStream out(&file);
         out << QString(data->getDirectory());
-        //Save QHashes
+        out << QHash<QString, QString>(*(data->getLabels()));
+        out << QHash<QString, QString>(*(data->getHistory()));
     }
 }
 
-void MainWindow::LoadProject()
+void MainWindow::LoadProject(QString path)
 {
-    //Just a debugging code
+    projectPath = path;
+    QDirIterator *dir = new QDirIterator(projectPath, QDirIterator::Subdirectories);
+    bool isProj = false;
+    while(dir->hasNext())
+    {
+        QFileInfo fi = dir->fileInfo();
+        if(fi.fileName() == "projdata.dat" || fi.fileName() == "labels.txt")
+            isProj = true;
+        dir->next();
+    }
+    if(!isProj)
+        return;
+
+    if(projectPath != "")
+        this->setWindowTitle("LabelingTool  -  " + projectPath);
     QString filename = projectPath + "/projdata.dat";
     QFile file(filename);
+    StoreData *data = new StoreData();
     if(file.open(QIODevice::ReadOnly))
     {
         QDataStream in(&file);
         QString str;
         in >> str;
-        qDebug() << str << endl;
-    }
-}
+        data->setDirectory(str);
 
-//TODO: saving project state (saving QHash+dirname object on a file) + load project menù entry -> QDataStream+QFile;
+        QHash<QString, QString> *tmp = new QHash<QString, QString>();
+        in >> *tmp;
+        data->setLabels(tmp);
+
+        QHash<QString, QString> *htmp = new QHash<QString, QString>();
+        in >> *htmp;
+        data->setHistory(htmp);
+    }
+
+    SelectDir(data->getDirectory());
+    imgLabels = data->getLabels();
+    labelsHistory = data->getHistory();
+
+    if(imgLabels->value(iter->path) != "")
+        currentLabel->setText(imgLabels->value(iter->path));
+    else
+        currentLabel->setText("NoLabel");
+
+    ui->actionFinalize_Project->setEnabled(true);
+    ui->actionSave_Project->setEnabled(true);
+}

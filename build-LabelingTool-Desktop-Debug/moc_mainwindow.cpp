@@ -81,7 +81,7 @@ static const uint qt_meta_data_MainWindow[] = {
       11,    0,   84,    2, 0x0a /* Public */,
       12,    0,   85,    2, 0x0a /* Public */,
       13,    0,   86,    2, 0x0a /* Public */,
-      14,    0,   87,    2, 0x0a /* Public */,
+      14,    1,   87,    2, 0x0a /* Public */,
 
  // slots: parameters
     QMetaType::Void,
@@ -95,7 +95,7 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::QString,    2,
 
        0        // eod
 };
@@ -117,7 +117,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 8: _t->EditLabels(); break;
         case 9: _t->FinalizeProject(); break;
         case 10: _t->SaveProject(); break;
-        case 11: _t->LoadProject(); break;
+        case 11: _t->LoadProject((*reinterpret_cast< QString(*)>(_a[1]))); break;
         default: ;
         }
     }
