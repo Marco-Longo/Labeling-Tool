@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowIcon(QPixmap("./Assets/icon.png"));
+    ui->b_addlabel->setIcon(QIcon("./Assets/add.svg"));
+    ui->b_removelabel->setIcon(QIcon("./Assets/remove.svg"));
     QObject::connect(ui->b_label0, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label1, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label2, SIGNAL(clicked()), this, SLOT(AssociateLabel()));

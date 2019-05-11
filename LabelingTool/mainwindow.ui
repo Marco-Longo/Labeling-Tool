@@ -95,10 +95,6 @@
     <property name="text">
      <string>   Label</string>
     </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>../build-LabelingTool-Desktop-Debug/Assets/add.svg</normaloff>../build-LabelingTool-Desktop-Debug/Assets/add.svg</iconset>
-    </property>
    </widget>
    <widget class="QPushButton" name="b_undo">
     <property name="enabled">
@@ -130,10 +126,6 @@
     </property>
     <property name="text">
      <string>   Label</string>
-    </property>
-    <property name="icon">
-     <iconset>
-      <normaloff>../build-LabelingTool-Desktop-Debug/Assets/remove.svg</normaloff>../build-LabelingTool-Desktop-Debug/Assets/remove.svg</iconset>
     </property>
    </widget>
    <widget class="QToolButton" name="b_editlabels">

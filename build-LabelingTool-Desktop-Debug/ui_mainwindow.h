@@ -92,9 +92,6 @@ public:
         b_addlabel = new QPushButton(centralWidget);
         b_addlabel->setObjectName(QStringLiteral("b_addlabel"));
         b_addlabel->setGeometry(QRect(1120, 780, 90, 40));
-        QIcon icon;
-        icon.addFile(QStringLiteral("../build-LabelingTool-Desktop-Debug/Assets/add.svg"), QSize(), QIcon::Normal, QIcon::Off);
-        b_addlabel->setIcon(icon);
         b_undo = new QPushButton(centralWidget);
         b_undo->setObjectName(QStringLiteral("b_undo"));
         b_undo->setEnabled(false);
@@ -102,9 +99,6 @@ public:
         b_removelabel = new QPushButton(centralWidget);
         b_removelabel->setObjectName(QStringLiteral("b_removelabel"));
         b_removelabel->setGeometry(QRect(1220, 780, 90, 40));
-        QIcon icon1;
-        icon1.addFile(QStringLiteral("../build-LabelingTool-Desktop-Debug/Assets/remove.svg"), QSize(), QIcon::Normal, QIcon::Off);
-        b_removelabel->setIcon(icon1);
         b_editlabels = new QToolButton(centralWidget);
         b_editlabels->setObjectName(QStringLiteral("b_editlabels"));
         b_editlabels->setGeometry(QRect(1320, 70, 21, 21));
