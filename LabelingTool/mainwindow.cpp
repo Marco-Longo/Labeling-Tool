@@ -240,9 +240,9 @@ void MainWindow::RemoveLabel()
 {
     if(additionalLabelButtons->isEmpty())
         return;
-    QPushButton *button = lastLabelButton;
-    button -> hide();
     additionalLabelButtons->pop_back();
+    lastLabelButton->hide();
+    delete lastLabelButton;
     if(!additionalLabelButtons->isEmpty())
         lastLabelButton = additionalLabelButtons->last();
     else
