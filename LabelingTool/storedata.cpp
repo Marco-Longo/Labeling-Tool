@@ -3,16 +3,16 @@
 StoreData::StoreData()
 {
     directory = "";
+    job = "";
     labels = nullptr;
-    history = nullptr;
     buttons = nullptr;
 }
 
-StoreData::StoreData(QString dir, QHash<QString, QString> *lab, QHash<QString, QString> *his, QVector<QString>* but)
+StoreData::StoreData(QString dir, QString type, QHash<QString, QString> *lab, QVector<QString>* but)
 {
     directory = dir;
+    job = type;
     labels = lab;
-    history = his;
     buttons = but;
 }
 
@@ -26,9 +26,9 @@ QHash<QString, QString>* StoreData::getLabels()
     return labels;
 }
 
-QHash<QString, QString>* StoreData::getHistory()
+QString StoreData::getJob()
 {
-    return history;
+    return job;
 }
 
 QVector<QString>* StoreData::getButtons()
@@ -46,9 +46,9 @@ void StoreData::setLabels(QHash<QString, QString>* l)
     labels = l;
 }
 
-void StoreData::setHistory(QHash<QString, QString>* h)
+void StoreData::setJob(QString j)
 {
-    history = h;
+    job = j;
 }
 
 void StoreData::setButtons(QVector<QString>* b)

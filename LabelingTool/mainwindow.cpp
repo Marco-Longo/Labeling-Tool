@@ -12,19 +12,15 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowIcon(QPixmap("./Assets/icon.png"));
     ui->b_addlabel->setIcon(QIcon("./Assets/add.svg"));
     ui->b_removelabel->setIcon(QIcon("./Assets/remove.svg"));
+
     QObject::connect(ui->b_label0, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label1, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label2, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
-    QObject::connect(ui->b_addlabel, SIGNAL(clicked()), this, SLOT(AddLabel()));
-    QObject::connect(ui->b_removelabel, SIGNAL(clicked()), this, SLOT(RemoveLabel()));
-    QObject::connect(ui->b_editlabels, SIGNAL(clicked()), this, SLOT(EditLabels()));
     QObject::connect(ui->b_undo, SIGNAL(clicked()), this, SLOT(Undo()));
     lastLabelButton = ui->b_label2;
 
     QObject::connect(ui->actionQuit, SIGNAL(triggered()), QApplication::instance(), SLOT(quit()));
     QObject::connect(ui->actionNew_Project, SIGNAL(triggered()), this, SLOT(CreateNewProject()));
-    QObject::connect(ui->actionFinalize_Project, SIGNAL(triggered()), this, SLOT(FinalizeProject()));
-    QObject::connect(ui->actionSave_Project, SIGNAL(triggered()), this, SLOT(SaveProject()));
 
     loadDialog = new QFileDialog(this);
     loadDialog->setFileMode(QFileDialog::DirectoryOnly);
@@ -45,17 +41,42 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dirSelectDialog, SIGNAL(fileSelected(QString)), this, SLOT(SelectDir(QString)));
 
     images = new QLinkedList<Image>();
-    imgLabels = new QHash<QString, QString>();
-    labelsHistory = new QHash<QString, QString>();
-    additionalLabelButtons = new QLinkedList<QPushButton *>();
     InitImageFrame();
     QObject::connect(forward, SIGNAL(clicked()), this, SLOT(NextImage()));
     QObject::connect(backward, SIGNAL(clicked()), this, SLOT(PreviousImage()));
+
+    imgLabels = new QHash<QString, QString>();
+    labelsHistory = new QHash<QString, QString>();
+    additionalLabelButtons = new QLinkedList<QPushButton *>();
+    //Hiding SL buttons
+    ui->b_label0->setHidden(true);
+    ui->b_label1->setHidden(true);
+    ui->b_label2->setHidden(true);
+    ui->b_undo->setHidden(true);
+    ui->b_addlabel->setHidden(true);
+    ui->b_removelabel->setHidden(true);
+    ui->b_editlabels->setHidden(true);
+
+    //MULTI LABEL
+    multiGroup = new QButtonGroup(this);
+    multiGroup->setExclusive(false);
+    QFile File("./Assets/QSS/checkbox.qss");
+    File.open(QFile::ReadOnly);
+    checkbox_qss = QString(File.readAll());
+    imgMultiLabels = new QHash<QString, QVector<QString>>();
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::ErrorMsg(QString msg)
+{
+    QMessageBox err;
+    err.setIcon(QMessageBox::Critical);
+    err.setText(msg);
+    err.exec();
 }
 
 void MainWindow::InitImageFrame()
@@ -94,11 +115,7 @@ void MainWindow::NextImage()
         if(iter == images->end())
             iter = images->begin();
         imageLabel->setPixmap(iter->pic);
-        ui->b_undo->setEnabled(false);
-        if(imgLabels->contains(iter->path))
-            currentLabel->setText(imgLabels->value(iter->path));
-        else
-            currentLabel->setText("No Label");
+        UpdateUI();
     }
 }
 
@@ -111,11 +128,74 @@ void MainWindow::PreviousImage()
         else
             iter--;
         imageLabel->setPixmap(iter->pic);
+        UpdateUI();
+    }
+}
+
+void MainWindow::UpdateUI()
+{
+    if(projectJob == "SingleLabel")
+    {
         ui->b_undo->setEnabled(false);
         if(imgLabels->contains(iter->path))
             currentLabel->setText(imgLabels->value(iter->path));
         else
             currentLabel->setText("No Label");
+    }
+    else if(projectJob == "MultiLabel")
+    {
+        foreach(QAbstractButton *button, multiGroup->buttons())
+        {
+            if(imgMultiLabels->contains(iter->path))
+            {
+                if(imgMultiLabels->value(iter->path).contains(button->text()))
+                    button->setChecked(true);
+                else
+                    button->setChecked(false);
+            }
+            else
+                button->setChecked(false);
+        }
+    }
+    else if(projectJob == "Segmentation")
+    {
+        //UI updates based on data structures' values for the current image
+    }
+}
+
+void MainWindow::LoadUI()
+{
+    if(projectJob == "SingleLabel")
+        ShowSingleLabel();
+    else if(projectJob == "MultiLabel")
+        ShowMultiLabel();
+    else if(projectJob == "Segmentation")
+        ShowSegmentation();
+}
+
+void MainWindow::EnableLabels()
+{
+    if(projectJob == "SingleLabel")
+    {
+        ui->b_label0->setEnabled(true);
+        ui->b_label1->setEnabled(true);
+        ui->b_label2->setEnabled(true);
+        ui->b_addlabel->setEnabled(true);
+        UpdateUI();
+        currentLabel->setHidden(false);
+    }
+    else if(projectJob == "MultiLabel")
+    {
+        foreach(QAbstractButton *button, multiGroup->buttons())
+            button->setEnabled(true);
+        ui->b_addlabel->setEnabled(true);
+        UpdateUI();
+    }
+    else if(projectJob == "Segmentation")
+    {
+        //SEGMENT UI enable
+
+        //UpdateUI();
     }
 }
 
@@ -123,14 +203,6 @@ void MainWindow::ClearImgList()
 {
     images->clear();
     imageLabel->setPixmap(QPixmap("./Assets/placeholder.jpg"));
-}
-
-void MainWindow::EnableLabels()
-{
-    ui->b_label0->setEnabled(true);
-    ui->b_label1->setEnabled(true);
-    ui->b_label2->setEnabled(true);
-    currentLabel->setHidden(false);
 }
 
 void MainWindow::SelectDir(QString path)
@@ -152,11 +224,28 @@ void MainWindow::SelectDir(QString path)
           }
         dir->next();
     }
-    if(containsImgs)
-        EnableLabels();
     iter = images->begin();
     if(!images->isEmpty())
         imageLabel->setPixmap(iter->pic);
+    if(containsImgs)
+        EnableLabels();
+}
+
+void MainWindow::ShowSingleLabel()
+{
+    ui->b_label0->setHidden(false);
+    ui->b_label1->setHidden(false);
+    ui->b_label2->setHidden(false);
+    ui->b_undo->setHidden(false);
+    ui->b_addlabel->setHidden(false);
+    ui->b_removelabel->setHidden(false);
+    ui->b_editlabels->setHidden(false);
+
+    QObject::connect(ui->actionFinalize_Project, SIGNAL(triggered()), this, SLOT(FinalizeProject()));
+    QObject::connect(ui->actionSave_Project, SIGNAL(triggered()), this, SLOT(SaveProject()));
+    QObject::connect(ui->b_addlabel, SIGNAL(clicked()), this, SLOT(AddLabel()));
+    QObject::connect(ui->b_removelabel, SIGNAL(clicked()), this, SLOT(RemoveLabel()));
+    QObject::connect(ui->b_editlabels, SIGNAL(clicked()), this, SLOT(EditLabels()));
 }
 
 void MainWindow::UpdateCurrLabel(QString s)
@@ -182,9 +271,6 @@ void MainWindow::AssociateLabel()
         ui->b_undo->setEnabled(true);
     }
     UpdateCurrLabel(snd->objectName());
-
-    //qDebug() << "History Hash" << currentImage << (labelsHistory->contains(currentImage) ? labelsHistory->value(currentImage) : "empty");
-    //qDebug() << "Hash" << currentImage << (imgLabels->contains(currentImage) ? imgLabels->value(currentImage) : "empty");
 }
 
 void MainWindow::Undo()
@@ -200,9 +286,6 @@ void MainWindow::Undo()
         currentLabel->setText(imgLabels->value(currentImage));
     else
         currentLabel->setText("No Label");
-
-    //qDebug() << "History Hash" << currentImage << (labelsHistory->contains(currentImage) ? labelsHistory->value(currentImage) : "empty");
-    //qDebug() << "Hash" << currentImage << (imgLabels->contains(currentImage) ? imgLabels->value(currentImage) : "empty");
 }
 
 void MainWindow::CreateNewProject()
@@ -210,18 +293,23 @@ void MainWindow::CreateNewProject()
     NewProject *np = new NewProject();
     np->exec();
     projectPath = np->FullPath();
-    ui->actionFinalize_Project->setEnabled(true);
-    ui->actionSave_Project->setEnabled(true);
-    if(projectPath != "")
+    projectJob = np ->ProjType();
+    if(projectPath != "" && projectJob != "")
+    {
+        LoadUI();
+        ui->actionSave_Project->setEnabled(true);
+        ui->actionFinalize_Project->setEnabled(true);
         this->setWindowTitle("LabelingTool  -  " + projectPath);
+    }
 }
 
 void MainWindow::AddLabel()
 {
     if(images->isEmpty())
+    {
+        ErrorMsg("The input directory you selected does not contain any supported image file");
         return;
-    if(additionalLabelButtons->count() == 8)
-        return;
+    }
 
     QPoint loc = (lastLabelButton->geometry()).topLeft();
     loc.setY(loc.y()+60);
@@ -234,12 +322,18 @@ void MainWindow::AddLabel()
 
     QObject::connect(newButton, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     lastLabelButton = additionalLabelButtons->last();
+
+    if(additionalLabelButtons->count() == 1)
+        ui->b_removelabel->setEnabled(true);
+    if(additionalLabelButtons->count() == 8)
+        ui->b_addlabel->setEnabled(false);
 }
 
 void MainWindow::RemoveLabel()
 {
     if(additionalLabelButtons->isEmpty())
         return;
+
     additionalLabelButtons->pop_back();
     lastLabelButton->hide();
     delete lastLabelButton;
@@ -247,6 +341,11 @@ void MainWindow::RemoveLabel()
         lastLabelButton = additionalLabelButtons->last();
     else
         lastLabelButton = ui->b_label2;
+
+    if(additionalLabelButtons->count() == 7)
+        ui->b_addlabel->setEnabled(true);
+    if(additionalLabelButtons->isEmpty())
+        ui->b_removelabel->setEnabled(false);
 }
 
 void MainWindow::EditLabels()
@@ -278,7 +377,10 @@ void MainWindow::EditLabels()
 void MainWindow::FinalizeProject()
 {
     if(projectPath == "" || images->isEmpty())
+    {
+        ErrorMsg("You must first select an image directory");
         return;
+    }
 
     QString filename = projectPath + "/labels.txt";
     QFile file(filename);
@@ -286,6 +388,7 @@ void MainWindow::FinalizeProject()
     if(file.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
         QTextStream stream(&file);
+        QLinkedList<Image>::const_iterator tmp_iter = iter;
         for(iter = images->begin(); iter != images->end(); iter++)
         {
             stream << iter->path;
@@ -296,13 +399,17 @@ void MainWindow::FinalizeProject()
                 stream << "NoLabel";
             stream << endl;
         }
+        iter = tmp_iter;
     }
 }
 
 void MainWindow::SaveProject()
 {
     if(projectPath == "" || images->isEmpty())
+    {
+        ErrorMsg("You must first select an image directory");
         return;
+    }
 
     QVector<QString>* buttons = new QVector<QString>();
     buttons->push_back(ui->b_label0->text());
@@ -316,21 +423,29 @@ void MainWindow::SaveProject()
             buttons->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindDirectChildrenOnly)->text());
         }
 
-    StoreData *data = new StoreData(imgDirectory, imgLabels, labelsHistory, buttons);
+    StoreData *data = new StoreData(imgDirectory, projectJob, imgLabels, buttons);
     QString filename = projectPath + "/projdata.dat";
     QFile file(filename);
     if(file.open(QIODevice::WriteOnly | QIODevice::Truncate))
     {
         QDataStream out(&file);
+        out << QString(data->getJob());
         out << QString(data->getDirectory());
         out << QHash<QString, QString>(*(data->getLabels()));
-        out << QHash<QString, QString>(*(data->getHistory()));
         out << QVector<QString>(*(data->getButtons()));
     }
 }
 
 void MainWindow::LoadProject(QString path)
 {
+    if(path == "")
+        return;
+    if(projectPath != "")
+    {
+        ErrorMsg("Please close the client and restart it to load another project");
+        return;
+    }
+
     projectPath = path;
     QDirIterator *dir = new QDirIterator(projectPath, QDirIterator::Subdirectories);
     bool isProj = false;
@@ -342,46 +457,64 @@ void MainWindow::LoadProject(QString path)
         dir->next();
     }
     if(!isProj)
-        return;
-
-    if(projectPath != "")
-        this->setWindowTitle("LabelingTool  -  " + projectPath);
-    QString filename = projectPath + "/projdata.dat";
-    QFile file(filename);
-    StoreData *data = new StoreData();
-    if(file.open(QIODevice::ReadOnly))
     {
-        QDataStream in(&file);
-        QString str;
-        in >> str;
-        data->setDirectory(str);
-
-        QHash<QString, QString> *tmp = new QHash<QString, QString>();
-        in >> *tmp;
-        data->setLabels(tmp);
-
-        QHash<QString, QString> *htmp = new QHash<QString, QString>();
-        in >> *htmp;
-        data->setHistory(htmp);
-
-        QVector<QString> *btmp = new QVector<QString>();
-        in >> *btmp;
-        data->setButtons(btmp);
+        ErrorMsg("The directory you selected is invalid");
+        return;
     }
 
-    SelectDir(data->getDirectory());
+    this->setWindowTitle("LabelingTool  -  " + projectPath);
+    QString filename = projectPath + "/projdata.dat";
+    QFile file(filename);
+    if(file.open(QIODevice::ReadOnly))
+    {
+        dataInputStream = new QDataStream(&file);
+        QString job;
+        (*dataInputStream) >> job;
+        projectJob = job;
+        LoadUI();
+
+        QString dir;
+        (*dataInputStream) >> dir;
+        SelectDir(dir);
+    }
+    else
+    {
+        ErrorMsg("There was a problem loading the configuration files for the project");
+        return;
+    }
+
+    if(projectJob == "SingleLabel")
+        SingleLoading();
+    else if(projectJob == "MultiLabel")
+        MultiLoading();
+    else if(projectJob == "Segmentation")
+        SegmLoading();
+    else
+        ErrorMsg("Project type is invalid");
+}
+
+void MainWindow::SingleLoading()
+{
+    StoreData *data = new StoreData();
+    QHash<QString, QString> *tmp = new QHash<QString, QString>();
+    (*dataInputStream) >> *tmp;
+    data->setLabels(tmp);
+
+    QVector<QString> *btmp = new QVector<QString>();
+    (*dataInputStream) >> *btmp;
+    data->setButtons(btmp);
+
     imgLabels = data->getLabels();
-    labelsHistory = data->getHistory();
     LoadLabelButtons(data->getButtons());
 
     if(imgLabels->value(iter->path) != "")
         currentLabel->setText(imgLabels->value(iter->path));
     else
-        currentLabel->setText("NoLabel");
+        currentLabel->setText("No Label");
 
-    ui->b_undo->setEnabled(true);
     ui->actionFinalize_Project->setEnabled(true);
     ui->actionSave_Project->setEnabled(true);
+    delete dataInputStream;
 }
 
 void MainWindow::LoadLabelButtons(QVector<QString>* buttons)
@@ -395,4 +528,238 @@ void MainWindow::LoadLabelButtons(QVector<QString>* buttons)
         QString buttonName = "b_label" + QString::number(i);
         this->centralWidget()->findChild<QPushButton *>(buttonName, Qt::FindDirectChildrenOnly)->setText(buttons->at(i));
     }
+}
+
+//MULTI LABEL
+void MainWindow::ShowMultiLabel()
+{
+    for(int i=0; i<3; i++)
+    {
+        QCheckBox *box = new QCheckBox(this);
+        box->setObjectName("c_label" + QString::number(i));
+        box->setText("Label " + QString::number(i));
+        box->setGeometry(1120, 95+i*50, 190, 40);
+        box->setStyleSheet(checkbox_qss);
+        box->setFont(QFont("Ubuntu", 15, -1));
+        box->setEnabled(false);
+        box->show();
+        QObject::connect(box, SIGNAL(clicked(bool)), this, SLOT(AssociateMultiLabel(bool)));
+        multiGroup->addButton(box, i);
+    }
+
+    QObject::connect(ui->b_addlabel, SIGNAL(clicked()), this, SLOT(AddMultiLabel()));
+    QObject::connect(ui->b_removelabel, SIGNAL(clicked()), this, SLOT(RemoveMultiLabel()));
+    QObject::connect(ui->b_editlabels, SIGNAL(clicked()), this, SLOT(EditMultiLabels()));
+    QObject::connect(ui->actionFinalize_Project, SIGNAL(triggered()), this, SLOT(MultiFinalizeProject()));
+    QObject::connect(ui->actionSave_Project, SIGNAL(triggered()), this, SLOT(MultiSaveProject()));
+    ui->b_addlabel->setHidden(false);
+    ui->b_removelabel->setHidden(false);
+    ui->b_editlabels->setGeometry(1320, 80, 21, 21);
+    ui->b_editlabels->setHidden(false);
+}
+
+void MainWindow::AddMultiLabel()
+{
+    if(images->isEmpty())
+    {
+        ErrorMsg("The input directory you selected does not contain any supported image file");
+        return;
+    }
+
+    QCheckBox *lastBox = static_cast<QCheckBox *>(multiGroup->buttons().last());
+    QPoint loc = (lastBox->geometry()).topLeft();
+    loc.setY(loc.y()+50);
+    QCheckBox *newBox = new QCheckBox(this);
+    newBox -> setObjectName("c_label" + QString::number(multiGroup->buttons().count()));
+    newBox -> setText("New Label");
+    newBox -> setGeometry(loc.x(), loc.y(), 190, 40);
+    newBox -> setStyleSheet(checkbox_qss);
+    newBox -> setFont(QFont("Ubuntu", 15, -1));
+    newBox -> show();
+    QObject::connect(newBox, SIGNAL(clicked(bool)), this, SLOT(AssociateMultiLabel(bool)));
+    multiGroup->addButton(newBox, multiGroup->buttons().count());
+
+    if(multiGroup->buttons().count() == 4)
+        ui->b_removelabel->setEnabled(true);
+    if(multiGroup->buttons().count() == 14)
+        ui->b_addlabel->setEnabled(false);
+}
+
+void MainWindow::RemoveMultiLabel()
+{
+    if(multiGroup->buttons().isEmpty())
+        return;
+
+    QCheckBox *elimBox = static_cast<QCheckBox *>(multiGroup->buttons().last());
+    elimBox->hide();
+    delete elimBox;
+    multiGroup->buttons().pop_back();
+
+    if(multiGroup->buttons().count() == 13)
+        ui->b_addlabel->setEnabled(true);
+    if(multiGroup->buttons().count() == 3)
+        ui->b_removelabel->setEnabled(false);
+}
+
+void MainWindow::EditMultiLabels()
+{
+    LabelEditor *labEdit = new LabelEditor();
+    QVector<QCheckBox *> *editingList = new QVector<QCheckBox *>();
+    foreach(QAbstractButton *button, multiGroup->buttons())
+        editingList->push_back(static_cast<QCheckBox *>(button));
+
+    labEdit->setDimension(static_cast<unsigned long>(editingList->size()));
+    labEdit->exec();
+    if(!labEdit->Ready())
+        return;
+
+    for(int i=0; i<int(editingList->size()); i++)
+    {
+        if(labEdit->getEntry(i) != "")
+            editingList->at(i) -> setText(labEdit->getEntry(i));
+    }
+}
+
+void MainWindow::AssociateMultiLabel(bool checked)
+{
+    if(images->isEmpty())
+        return;
+
+    QObject *snd = QObject::sender();
+    QString label = (this->findChild<QCheckBox *>(snd->objectName(), Qt::FindChildrenRecursively))->text();
+    QString currentImage = QString(iter->path);
+
+    if(checked)
+    {
+        QList<QString> aux = imgMultiLabels->value(currentImage).toList();
+        aux.push_back(label);
+        imgMultiLabels->insert(currentImage, aux.toVector());
+    }
+    else
+    {
+        QList<QString> aux = imgMultiLabels->value(currentImage).toList();
+        aux.removeOne(label);
+        imgMultiLabels->insert(currentImage, aux.toVector());
+    }
+}
+
+void MainWindow::MultiFinalizeProject()
+{
+    if(projectPath == "" || images->isEmpty())
+    {
+        ErrorMsg("You must first select an image directory");
+        return;
+    }
+
+    QString filename = projectPath + "/labels.txt";
+    QFile file(filename);
+    if(file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        QTextStream stream(&file);
+        QLinkedList<Image>::const_iterator tmp_iter = iter;
+        for(iter = images->begin(); iter != images->end(); iter++)
+        {
+            stream << iter->path;
+            stream << " ";
+            if(imgMultiLabels->contains(iter->path))
+            {
+                QVector<QString> tmp = imgMultiLabels->value(iter->path);
+                if(tmp.isEmpty())
+                    stream << "NoLabel";
+                for(int i=0; i<tmp.size(); i++)
+                    stream << tmp.at(i) << " ";
+            }
+            else
+                stream << "NoLabel";
+            stream << endl;
+        }
+        iter = tmp_iter;
+    }
+}
+
+void MainWindow::MultiSaveProject()
+{
+    if(projectPath == "" || images->isEmpty())
+    {
+        ErrorMsg("You must first select an image directory");
+        return;
+    }
+
+    QVector<QString> *checkboxes = new QVector<QString>();
+    foreach(QAbstractButton *button, multiGroup->buttons())
+        checkboxes->push_back(button->text());
+
+    QString filename = projectPath + "/projdata.dat";
+    QFile file(filename);
+    if(file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        QDataStream out(&file);
+        out << QString(projectJob);
+        out << QString(imgDirectory);
+        out << QHash<QString, QVector<QString>>(*imgMultiLabels);
+        out << QVector<QString>(*checkboxes);
+    }
+}
+
+void MainWindow::MultiLoading()
+{
+    QHash<QString, QVector<QString>> *tmp = new QHash<QString, QVector<QString>>();
+    (*dataInputStream) >> *tmp;
+    imgMultiLabels = tmp;
+
+    QVector<QString> *ctmp = new QVector<QString>();
+    (*dataInputStream) >> *ctmp;
+    LoadMultiLabelButtons(ctmp);
+
+    UpdateUI();
+    ui->actionFinalize_Project->setEnabled(true);
+    ui->actionSave_Project->setEnabled(true);
+    delete dataInputStream;
+}
+
+void MainWindow::LoadMultiLabelButtons(QVector<QString> *checkboxes)
+{
+    multiGroup->button(0)->setText(checkboxes->at(0));
+    multiGroup->button(1)->setText(checkboxes->at(1));
+    multiGroup->button(2)->setText(checkboxes->at(2));
+
+    for(int i=3; i<checkboxes->size(); i++)
+    {
+        AddMultiLabel();
+        multiGroup->button(i)->setText(checkboxes->at(i));
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//SEGMENTATION
+void MainWindow::ShowSegmentation()
+{
+    //UI buttons
+
+    //save+finalize connects
+}
+
+void MainWindow::SegmLoading()
+{
+
 }

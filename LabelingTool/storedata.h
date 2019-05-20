@@ -8,20 +8,20 @@ class StoreData
 {
 public:
     StoreData();
-    StoreData(QString, QHash<QString, QString>*, QHash<QString, QString>*, QVector<QString>*);
+    StoreData(QString, QString, QHash<QString, QString>*, QVector<QString>*);
     QString getDirectory();
+    QString getJob();
     QHash<QString, QString>* getLabels();
-    QHash<QString, QString>* getHistory();
     QVector<QString>* getButtons();
     void setDirectory(QString);
+    void setJob(QString);
     void setLabels(QHash<QString, QString>*);
-    void setHistory(QHash<QString, QString>*);
     void setButtons(QVector<QString>*);
 
 private:
     QString directory;
+    QString job;
     QHash<QString, QString> *labels;
-    QHash<QString, QString> *history;
     QVector<QString> *buttons;
 };
 

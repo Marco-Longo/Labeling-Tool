@@ -15,6 +15,7 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDialog>
 #include <QtWidgets/QDialogButtonBox>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QPushButton>
@@ -28,15 +29,19 @@ public:
     QLineEdit *txtbox_name;
     QLineEdit *txtbox_dir;
     QPushButton *b_browse;
+    QGroupBox *jobGroup;
+    QPushButton *b_singleLabel;
+    QPushButton *b_multiLabel;
+    QPushButton *b_segmentation;
 
     void setupUi(QDialog *NewProject)
     {
         if (NewProject->objectName().isEmpty())
             NewProject->setObjectName(QStringLiteral("NewProject"));
-        NewProject->resize(600, 200);
+        NewProject->resize(600, 261);
         buttonBox = new QDialogButtonBox(NewProject);
         buttonBox->setObjectName(QStringLiteral("buttonBox"));
-        buttonBox->setGeometry(QRect(380, 150, 221, 41));
+        buttonBox->setGeometry(QRect(380, 210, 220, 40));
         buttonBox->setOrientation(Qt::Horizontal);
         buttonBox->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
         buttonBox->setCenterButtons(true);
@@ -50,6 +55,30 @@ public:
         b_browse = new QPushButton(NewProject);
         b_browse->setObjectName(QStringLiteral("b_browse"));
         b_browse->setGeometry(QRect(470, 120, 89, 25));
+        jobGroup = new QGroupBox(NewProject);
+        jobGroup->setObjectName(QStringLiteral("jobGroup"));
+        jobGroup->setGeometry(QRect(40, 140, 521, 61));
+        QFont font;
+        font.setKerning(true);
+        jobGroup->setFont(font);
+        jobGroup->setCursor(QCursor(Qt::PointingHandCursor));
+        jobGroup->setAutoFillBackground(false);
+        jobGroup->setFlat(false);
+        b_singleLabel = new QPushButton(jobGroup);
+        b_singleLabel->setObjectName(QStringLiteral("b_singleLabel"));
+        b_singleLabel->setGeometry(QRect(0, 20, 151, 41));
+        b_singleLabel->setCheckable(true);
+        b_singleLabel->setAutoExclusive(true);
+        b_multiLabel = new QPushButton(jobGroup);
+        b_multiLabel->setObjectName(QStringLiteral("b_multiLabel"));
+        b_multiLabel->setGeometry(QRect(190, 20, 151, 41));
+        b_multiLabel->setCheckable(true);
+        b_multiLabel->setAutoExclusive(true);
+        b_segmentation = new QPushButton(jobGroup);
+        b_segmentation->setObjectName(QStringLiteral("b_segmentation"));
+        b_segmentation->setGeometry(QRect(380, 20, 141, 41));
+        b_segmentation->setCheckable(true);
+        b_segmentation->setAutoExclusive(true);
 
         retranslateUi(NewProject);
         QObject::connect(buttonBox, SIGNAL(accepted()), NewProject, SLOT(accept()));
@@ -64,6 +93,10 @@ public:
         txtbox_name->setPlaceholderText(QApplication::translate("NewProject", "Insert project name", Q_NULLPTR));
         txtbox_dir->setPlaceholderText(QApplication::translate("NewProject", "Browse the directory you want to save your project in", Q_NULLPTR));
         b_browse->setText(QApplication::translate("NewProject", "Browse...", Q_NULLPTR));
+        jobGroup->setTitle(QApplication::translate("NewProject", "Job", Q_NULLPTR));
+        b_singleLabel->setText(QApplication::translate("NewProject", "Single Labeling", Q_NULLPTR));
+        b_multiLabel->setText(QApplication::translate("NewProject", "Multi Labeling", Q_NULLPTR));
+        b_segmentation->setText(QApplication::translate("NewProject", "Segmentation", Q_NULLPTR));
     } // retranslateUi
 
 };

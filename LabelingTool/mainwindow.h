@@ -11,6 +11,9 @@
 #include <QLinkedList>
 #include <QListIterator>
 #include <QDebug>
+#include <QMessageBox>
+#include <QCheckBox>
+#include <QShortcut>
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +31,16 @@ public:
     void EnableLabels();
     void UpdateCurrLabel(QString);
     void LoadLabelButtons(QVector<QString>*);
+    void ShowSingleLabel();
+    void ShowMultiLabel();
+    void ShowSegmentation();
+    void LoadUI();
+    void UpdateUI();
+    void ErrorMsg(QString);
+    void SingleLoading();
+    void MultiLoading();
+    void LoadMultiLabelButtons(QVector<QString>*);
+    void SegmLoading();
 
 private:
     Ui::MainWindow *ui;
@@ -37,15 +50,22 @@ private:
     QString imgDirectory;
     QLabel *imageLabel;
     QCommandLinkButton *forward, *backward;
-    QLinkedList<Image> *images; //List of all the images in the directory
+    QLinkedList<Image> *images; //List of all the images in the selected directory
     QLinkedList<Image>::const_iterator iter; //Iterator for the images list
     QHash<QString, QString> *imgLabels; //Associates an image name with a label
     QHash<QString, QString> *labelsHistory; //History hasmap for imgLabels
     QString projectPath;
+    QString projectJob;
+    QDataStream *dataInputStream;
     QLabel *currentLabel;
     QPushButton *lastLabelButton;
     QLinkedList<QPushButton *> *additionalLabelButtons;
     QFileDialog *loadDialog;
+    //MULTI LABEL
+    QButtonGroup *multiGroup;
+    QString checkbox_qss;
+    QHash<QString, QVector<QString>> *imgMultiLabels; //Associates an image name with multiple labels
+
 
 public slots:
     void NextImage();
@@ -60,6 +80,13 @@ public slots:
     void FinalizeProject();
     void SaveProject();
     void LoadProject(QString);
+    //MULTI LABEL
+    void AddMultiLabel();
+    void RemoveMultiLabel();
+    void EditMultiLabels();
+    void AssociateMultiLabel(bool);
+    void MultiSaveProject();
+    void MultiFinalizeProject();
 };
 
 #endif // MAINWINDOW_H

@@ -91,6 +91,7 @@ public:
         b_label2->setAutoExclusive(false);
         b_addlabel = new QPushButton(centralWidget);
         b_addlabel->setObjectName(QStringLiteral("b_addlabel"));
+        b_addlabel->setEnabled(false);
         b_addlabel->setGeometry(QRect(1120, 780, 90, 40));
         b_undo = new QPushButton(centralWidget);
         b_undo->setObjectName(QStringLiteral("b_undo"));
@@ -98,6 +99,7 @@ public:
         b_undo->setGeometry(QRect(1120, 720, 190, 40));
         b_removelabel = new QPushButton(centralWidget);
         b_removelabel->setObjectName(QStringLiteral("b_removelabel"));
+        b_removelabel->setEnabled(false);
         b_removelabel->setGeometry(QRect(1220, 780, 90, 40));
         b_editlabels = new QToolButton(centralWidget);
         b_editlabels->setObjectName(QStringLiteral("b_editlabels"));
@@ -136,9 +138,21 @@ public:
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "LabelingTool", Q_NULLPTR));
         actionQuit->setText(QApplication::translate("MainWindow", "Quit", Q_NULLPTR));
         actionNew_Project->setText(QApplication::translate("MainWindow", "New Project...", Q_NULLPTR));
+#ifndef QT_NO_SHORTCUT
+        actionNew_Project->setShortcut(QApplication::translate("MainWindow", "Ctrl+N", Q_NULLPTR));
+#endif // QT_NO_SHORTCUT
         actionLoad_Project->setText(QApplication::translate("MainWindow", "Load Project...", Q_NULLPTR));
+#ifndef QT_NO_SHORTCUT
+        actionLoad_Project->setShortcut(QApplication::translate("MainWindow", "Ctrl+L", Q_NULLPTR));
+#endif // QT_NO_SHORTCUT
         actionSave_Project->setText(QApplication::translate("MainWindow", "Save Project", Q_NULLPTR));
+#ifndef QT_NO_SHORTCUT
+        actionSave_Project->setShortcut(QApplication::translate("MainWindow", "Ctrl+S", Q_NULLPTR));
+#endif // QT_NO_SHORTCUT
         actionFinalize_Project->setText(QApplication::translate("MainWindow", "Finalize Project", Q_NULLPTR));
+#ifndef QT_NO_SHORTCUT
+        actionFinalize_Project->setShortcut(QApplication::translate("MainWindow", "Ctrl+F", Q_NULLPTR));
+#endif // QT_NO_SHORTCUT
         b_label0->setText(QApplication::translate("MainWindow", "Label 0", Q_NULLPTR));
         b_label1->setText(QApplication::translate("MainWindow", "Label 1", Q_NULLPTR));
         b_label2->setText(QApplication::translate("MainWindow", "Label 2", Q_NULLPTR));

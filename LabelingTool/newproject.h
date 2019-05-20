@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QFileDialog>
+#include <QMessageBox>
 
 namespace Ui {
 class NewProject;
@@ -16,12 +17,14 @@ public:
     explicit NewProject(QWidget *parent = nullptr);
     ~NewProject();
     QString FullPath();
+    QString ProjType();
 
 private:
     Ui::NewProject *ui;
     QFileDialog *dirSelectDialog;
     QString projDirectory;
     QString projFullPath;
+    QString projJob;
 public slots:
     void SelectDir(QString);
     void CreateProj();
