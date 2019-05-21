@@ -139,6 +139,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="b_segmentation">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>380</x>

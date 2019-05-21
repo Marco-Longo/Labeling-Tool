@@ -37,8 +37,13 @@ public:
     void LoadUI();
     void UpdateUI();
     void ErrorMsg(QString);
+    int WarningMsg(QString, QString);
     void SingleLoading();
+    void CheckDuplicates(std::vector<QPushButton *>*);
+    void RemoveEntries(QString);
     void MultiLoading();
+    void CheckMultiDuplicates(QVector<QCheckBox *>*);
+    void RemoveMultiEntries(QString);
     void LoadMultiLabelButtons(QVector<QString>*);
     void SegmLoading();
 

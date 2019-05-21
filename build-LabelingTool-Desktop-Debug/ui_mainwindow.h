@@ -18,8 +18,10 @@
 #include <QtWidgets/QMenu>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QScrollArea>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolButton>
+#include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -40,6 +42,10 @@ public:
     QPushButton *b_undo;
     QPushButton *b_removelabel;
     QToolButton *b_editlabels;
+    QScrollArea *scrollArea;
+    QWidget *scrollAreaWidgetContents;
+    QWidget *verticalLayoutWidget;
+    QVBoxLayout *verticalLayout;
     QMenuBar *menuBar;
     QMenu *menuMen;
     QStatusBar *statusBar;
@@ -75,18 +81,24 @@ public:
         b_label0->setObjectName(QStringLiteral("b_label0"));
         b_label0->setEnabled(false);
         b_label0->setGeometry(QRect(1120, 60, 190, 40));
+        b_label0->setMinimumSize(QSize(0, 40));
+        b_label0->setMaximumSize(QSize(190, 16777215));
         b_label0->setCheckable(false);
         b_label0->setAutoExclusive(false);
         b_label1 = new QPushButton(centralWidget);
         b_label1->setObjectName(QStringLiteral("b_label1"));
         b_label1->setEnabled(false);
         b_label1->setGeometry(QRect(1120, 120, 190, 40));
+        b_label1->setMinimumSize(QSize(0, 40));
+        b_label1->setMaximumSize(QSize(190, 16777215));
         b_label1->setCheckable(false);
         b_label1->setAutoExclusive(false);
         b_label2 = new QPushButton(centralWidget);
         b_label2->setObjectName(QStringLiteral("b_label2"));
         b_label2->setEnabled(false);
         b_label2->setGeometry(QRect(1120, 180, 190, 40));
+        b_label2->setMinimumSize(QSize(0, 40));
+        b_label2->setMaximumSize(QSize(190, 16777215));
         b_label2->setCheckable(false);
         b_label2->setAutoExclusive(false);
         b_addlabel = new QPushButton(centralWidget);
@@ -103,7 +115,24 @@ public:
         b_removelabel->setGeometry(QRect(1220, 780, 90, 40));
         b_editlabels = new QToolButton(centralWidget);
         b_editlabels->setObjectName(QStringLiteral("b_editlabels"));
-        b_editlabels->setGeometry(QRect(1320, 70, 21, 21));
+        b_editlabels->setGeometry(QRect(1340, 70, 21, 21));
+        scrollArea = new QScrollArea(centralWidget);
+        scrollArea->setObjectName(QStringLiteral("scrollArea"));
+        scrollArea->setGeometry(QRect(1120, 60, 211, 651));
+        scrollArea->setFrameShape(QFrame::NoFrame);
+        scrollArea->setWidgetResizable(true);
+        scrollAreaWidgetContents = new QWidget();
+        scrollAreaWidgetContents->setObjectName(QStringLiteral("scrollAreaWidgetContents"));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 211, 651));
+        verticalLayoutWidget = new QWidget(scrollAreaWidgetContents);
+        verticalLayoutWidget->setObjectName(QStringLiteral("verticalLayoutWidget"));
+        verticalLayoutWidget->setGeometry(QRect(0, 0, 191, 651));
+        verticalLayout = new QVBoxLayout(verticalLayoutWidget);
+        verticalLayout->setSpacing(20);
+        verticalLayout->setContentsMargins(11, 11, 11, 11);
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+        verticalLayout->setContentsMargins(0, 0, 0, 0);
+        scrollArea->setWidget(scrollAreaWidgetContents);
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -163,7 +192,7 @@ public:
         b_undo->setText(QApplication::translate("MainWindow", "Undo", Q_NULLPTR));
         b_removelabel->setText(QApplication::translate("MainWindow", "   Label", Q_NULLPTR));
 #ifndef QT_NO_TOOLTIP
-        b_editlabels->setToolTip(QApplication::translate("MainWindow", "Edit labels names", Q_NULLPTR));
+        b_editlabels->setToolTip(QApplication::translate("MainWindow", "Edit labels", Q_NULLPTR));
 #endif // QT_NO_TOOLTIP
         b_editlabels->setText(QApplication::translate("MainWindow", "...", Q_NULLPTR));
         menuMen->setTitle(QApplication::translate("MainWindow", "Men\303\271", Q_NULLPTR));

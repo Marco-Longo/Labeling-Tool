@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setWindowIcon(QPixmap("./Assets/icon.png"));
     ui->b_addlabel->setIcon(QIcon("./Assets/add.svg"));
     ui->b_removelabel->setIcon(QIcon("./Assets/remove.svg"));
+    ui->scrollArea->widget()->setLayout(ui->verticalLayout);
 
     QObject::connect(ui->b_label0, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
     QObject::connect(ui->b_label1, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
@@ -77,6 +78,17 @@ void MainWindow::ErrorMsg(QString msg)
     err.setIcon(QMessageBox::Critical);
     err.setText(msg);
     err.exec();
+}
+
+int MainWindow::WarningMsg(QString msg, QString query)
+{
+    QMessageBox warn;
+    warn.setIcon(QMessageBox::Warning);
+    warn.setText(msg);
+    warn.setInformativeText(query);
+    warn.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    warn.setDefaultButton(QMessageBox::Yes);
+    return warn.exec();
 }
 
 void MainWindow::InitImageFrame()
@@ -240,6 +252,9 @@ void MainWindow::ShowSingleLabel()
     ui->b_addlabel->setHidden(false);
     ui->b_removelabel->setHidden(false);
     ui->b_editlabels->setHidden(false);
+    ui->verticalLayout->addWidget(ui->b_label0);
+    ui->verticalLayout->addWidget(ui->b_label1);
+    ui->verticalLayout->addWidget(ui->b_label2);
 
     QObject::connect(ui->actionFinalize_Project, SIGNAL(triggered()), this, SLOT(FinalizeProject()));
     QObject::connect(ui->actionSave_Project, SIGNAL(triggered()), this, SLOT(SaveProject()));
@@ -250,7 +265,7 @@ void MainWindow::ShowSingleLabel()
 
 void MainWindow::UpdateCurrLabel(QString s)
 {
-    QPushButton *button = this->centralWidget()->findChild<QPushButton *>(s, Qt::FindDirectChildrenOnly);
+    QPushButton *button = this->centralWidget()->findChild<QPushButton *>(s, Qt::FindChildrenRecursively);
     currentLabel->setText(button->text());
 }
 
@@ -260,7 +275,7 @@ void MainWindow::AssociateLabel()
         return;
 
     QObject *snd = QObject::sender();
-    QString label = (this->centralWidget()->findChild<QPushButton *>(snd->objectName(), Qt::FindDirectChildrenOnly))->text();
+    QString label = (this->centralWidget()->findChild<QPushButton *>(snd->objectName(), Qt::FindChildrenRecursively))->text();
     QString currentImage = QString(iter->path);
 
     if(label != imgLabels->value(currentImage))
@@ -290,6 +305,12 @@ void MainWindow::Undo()
 
 void MainWindow::CreateNewProject()
 {
+    if(projectPath != "")
+    {
+        ErrorMsg("Please save your current project, close the client and then restart it to create a new project");
+        return;
+    }
+
     NewProject *np = new NewProject();
     np->exec();
     projectPath = np->FullPath();
@@ -315,9 +336,12 @@ void MainWindow::AddLabel()
     loc.setY(loc.y()+60);
     QPushButton *newButton = new QPushButton(this->centralWidget());
     newButton -> setGeometry(loc.x(), loc.y(), 190, 40);
-    newButton -> setText("New Label");
+    newButton -> setText("New Label " + QString::number(additionalLabelButtons->count()+3));
     newButton -> setObjectName("b_label" + QString::number(additionalLabelButtons->count()+3));
+    newButton -> setMinimumHeight(40);
+    newButton -> setMaximumWidth(190);
     newButton -> show();
+    ui->verticalLayout->addWidget(newButton);
     additionalLabelButtons->push_back(newButton);
 
     QObject::connect(newButton, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
@@ -325,15 +349,16 @@ void MainWindow::AddLabel()
 
     if(additionalLabelButtons->count() == 1)
         ui->b_removelabel->setEnabled(true);
-    if(additionalLabelButtons->count() == 8)
-        ui->b_addlabel->setEnabled(false);
 }
 
 void MainWindow::RemoveLabel()
 {
     if(additionalLabelButtons->isEmpty())
         return;
+    if(WarningMsg("By deleting a label, the relative entry for all the images will be removed.", "Do you still want to continue?") == QMessageBox::No)
+        return;
 
+    QString label = additionalLabelButtons->last()->text();
     additionalLabelButtons->pop_back();
     lastLabelButton->hide();
     delete lastLabelButton;
@@ -341,11 +366,22 @@ void MainWindow::RemoveLabel()
         lastLabelButton = additionalLabelButtons->last();
     else
         lastLabelButton = ui->b_label2;
+    RemoveEntries(label);
 
-    if(additionalLabelButtons->count() == 7)
-        ui->b_addlabel->setEnabled(true);
     if(additionalLabelButtons->isEmpty())
         ui->b_removelabel->setEnabled(false);
+}
+
+void MainWindow::RemoveEntries(QString label)
+{
+    QLinkedList<Image>::const_iterator tmp_iter = iter;
+    for(iter = images->begin(); iter != images->end(); iter++)
+    {
+        if(imgLabels->value(iter->path) == label)
+            imgLabels->remove(iter->path);
+    }
+    iter = tmp_iter;
+    UpdateUI();
 }
 
 void MainWindow::EditLabels()
@@ -360,7 +396,7 @@ void MainWindow::EditLabels()
         {
             QString nextButton = "b_label";
             nextButton += QString::number(i);
-            editingList->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindDirectChildrenOnly));
+            editingList->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindChildrenRecursively));
         }
     labEdit->setDimension(editingList->size());
     labEdit->exec();
@@ -372,6 +408,26 @@ void MainWindow::EditLabels()
         if(labEdit->getEntry(i) != "")
             editingList->at(static_cast<std::make_unsigned<decltype(i)>::type>(i)) -> setText(labEdit->getEntry(i));
     }
+    CheckDuplicates(editingList);
+}
+
+void MainWindow::CheckDuplicates(std::vector<QPushButton *> *editingList)
+{
+    QVector<QString> *labelsList = new QVector<QString>();
+    bool error = false;
+
+    for(int i=0; i<int(editingList->size()); i++)
+    {
+        if(labelsList->contains(editingList->at(static_cast<unsigned long>(i))->text()))
+        {
+            editingList->at(static_cast<unsigned long>(i))->setText("New Label " + QString::number(i));
+            error = true;
+        }
+        labelsList->push_back(editingList->at(static_cast<unsigned long>(i))->text());
+    }
+    delete labelsList;
+    if(error)
+        ErrorMsg("Some of the labels you entered already existed. Their text has been reset to a default value");
 }
 
 void MainWindow::FinalizeProject()
@@ -420,7 +476,7 @@ void MainWindow::SaveProject()
         {
             QString nextButton = "b_label";
             nextButton += QString::number(i);
-            buttons->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindDirectChildrenOnly)->text());
+            buttons->push_back(this->centralWidget()->findChild<QPushButton *>(nextButton, Qt::FindChildrenRecursively)->text());
         }
 
     StoreData *data = new StoreData(imgDirectory, projectJob, imgLabels, buttons);
@@ -526,7 +582,7 @@ void MainWindow::LoadLabelButtons(QVector<QString>* buttons)
     {
         AddLabel();
         QString buttonName = "b_label" + QString::number(i);
-        this->centralWidget()->findChild<QPushButton *>(buttonName, Qt::FindDirectChildrenOnly)->setText(buttons->at(i));
+        this->centralWidget()->findChild<QPushButton *>(buttonName, Qt::FindChildrenRecursively)->setText(buttons->at(i));
     }
 }
 
@@ -539,11 +595,14 @@ void MainWindow::ShowMultiLabel()
         box->setObjectName("c_label" + QString::number(i));
         box->setText("Label " + QString::number(i));
         box->setGeometry(1120, 95+i*50, 190, 40);
+        box->setMinimumHeight(40);
+        box->setMaximumWidth(190);
         box->setStyleSheet(checkbox_qss);
         box->setFont(QFont("Ubuntu", 15, -1));
         box->setEnabled(false);
         box->show();
         QObject::connect(box, SIGNAL(clicked(bool)), this, SLOT(AssociateMultiLabel(bool)));
+        ui->verticalLayout->addWidget(box);
         multiGroup->addButton(box, i);
     }
 
@@ -554,8 +613,9 @@ void MainWindow::ShowMultiLabel()
     QObject::connect(ui->actionSave_Project, SIGNAL(triggered()), this, SLOT(MultiSaveProject()));
     ui->b_addlabel->setHidden(false);
     ui->b_removelabel->setHidden(false);
-    ui->b_editlabels->setGeometry(1320, 80, 21, 21);
     ui->b_editlabels->setHidden(false);
+    ui->scrollArea->setGeometry(1120, 60, 211, 711);
+    ui->verticalLayout->setGeometry(QRect(1120, 60, 191, 711));
 }
 
 void MainWindow::AddMultiLabel()
@@ -571,34 +631,56 @@ void MainWindow::AddMultiLabel()
     loc.setY(loc.y()+50);
     QCheckBox *newBox = new QCheckBox(this);
     newBox -> setObjectName("c_label" + QString::number(multiGroup->buttons().count()));
-    newBox -> setText("New Label");
+    newBox -> setText("New Label " + QString::number(multiGroup->buttons().count()));
     newBox -> setGeometry(loc.x(), loc.y(), 190, 40);
+    newBox -> setMinimumHeight(40);
+    newBox -> setMaximumWidth(190);
     newBox -> setStyleSheet(checkbox_qss);
     newBox -> setFont(QFont("Ubuntu", 15, -1));
     newBox -> show();
     QObject::connect(newBox, SIGNAL(clicked(bool)), this, SLOT(AssociateMultiLabel(bool)));
+    ui->verticalLayout->addWidget(newBox);
     multiGroup->addButton(newBox, multiGroup->buttons().count());
 
     if(multiGroup->buttons().count() == 4)
         ui->b_removelabel->setEnabled(true);
-    if(multiGroup->buttons().count() == 14)
-        ui->b_addlabel->setEnabled(false);
 }
 
 void MainWindow::RemoveMultiLabel()
 {
     if(multiGroup->buttons().isEmpty())
         return;
+    if(WarningMsg("By deleting a label, the relative entry for all the images will be removed.", "Do you still want to continue?") == QMessageBox::No)
+        return;
 
     QCheckBox *elimBox = static_cast<QCheckBox *>(multiGroup->buttons().last());
+    QString label = elimBox->text();
     elimBox->hide();
     delete elimBox;
     multiGroup->buttons().pop_back();
+    RemoveMultiEntries(label);
 
-    if(multiGroup->buttons().count() == 13)
-        ui->b_addlabel->setEnabled(true);
     if(multiGroup->buttons().count() == 3)
         ui->b_removelabel->setEnabled(false);
+}
+
+void MainWindow::RemoveMultiEntries(QString label)
+{
+    QLinkedList<Image>::const_iterator tmp_iter = iter;
+    for(iter = images->begin(); iter != images->end(); iter++)
+    {
+        if(imgMultiLabels->contains(iter->path))
+        {
+            if(imgMultiLabels->value(iter->path).contains(label))
+            {
+                QList<QString> aux = imgMultiLabels->value(iter->path).toList();
+                aux.removeOne(label);
+                imgMultiLabels->insert(iter->path, aux.toVector());
+            }
+        }
+    }
+    iter = tmp_iter;
+    UpdateUI();
 }
 
 void MainWindow::EditMultiLabels()
@@ -618,6 +700,26 @@ void MainWindow::EditMultiLabels()
         if(labEdit->getEntry(i) != "")
             editingList->at(i) -> setText(labEdit->getEntry(i));
     }
+    CheckMultiDuplicates(editingList);
+}
+
+void MainWindow::CheckMultiDuplicates(QVector<QCheckBox *> *editingList)
+{
+    QVector<QString> *labelsList = new QVector<QString>();
+    bool error = false;
+
+    for(int i=0; i<int(editingList->size()); i++)
+    {
+        if(labelsList->contains(editingList->at(i)->text()))
+        {
+            editingList->at(i)->setText("New Label " + QString::number(i));
+            error = true;
+        }
+        labelsList->push_back(editingList->at(i)->text());
+    }
+    delete labelsList;
+    if(error)
+        ErrorMsg("Some of the labels you entered already existed. Their text has been reset to a default value");
 }
 
 void MainWindow::AssociateMultiLabel(bool checked)

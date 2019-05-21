@@ -17,3 +17,10 @@ Un'altra feature del programma consiste nel permettere di selezionare delle zone
 Detection
 
 Simile al caso precedente, ma anzichè colorare l'utente racchiude in dei rettangoli delle zone dell'immagine che contengono un particolare elemento (esempio pedoni) e li associa ad una particolare classe.
+
+
+Seconda Parte
+• multilabeling: simile al single labeling, ma con buttons checkable, liste di label nell'hashmap
+• possibilità di scegliere il tipo di progetto dalla finestra new proj (controllo nel costruttore per caricamento della giusta interfaccia)
+• detection: creazione di bounding box sull'immagine (4 parametri) e associazione del label corrispondente dopo l'inserimento. All'inserimento si crea un pannello laterale che mostra un indice sequenziale e il nome del label associato al box (possono esserci duplicati). Finalize con 5 valori seguiti da punto e virgola oppure un file di testo per ogni immagine
+• deployment linux/windows

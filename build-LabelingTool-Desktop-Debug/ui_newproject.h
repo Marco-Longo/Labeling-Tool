@@ -76,6 +76,7 @@ public:
         b_multiLabel->setAutoExclusive(true);
         b_segmentation = new QPushButton(jobGroup);
         b_segmentation->setObjectName(QStringLiteral("b_segmentation"));
+        b_segmentation->setEnabled(false);
         b_segmentation->setGeometry(QRect(380, 20, 141, 41));
         b_segmentation->setCheckable(true);
         b_segmentation->setAutoExclusive(true);
