@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QMessageBox>
 #include <QCheckBox>
+#include <QButtonGroup>
 #include <QShortcut>
 
 namespace Ui {

@@ -10,8 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowIcon(QPixmap("./Assets/icon.png"));
-    ui->b_addlabel->setIcon(QIcon("./Assets/add.svg"));
-    ui->b_removelabel->setIcon(QIcon("./Assets/remove.svg"));
+    ui->b_addlabel->setIcon(QIcon("./Assets/add.png"));
+    ui->b_removelabel->setIcon(QIcon("./Assets/remove.png"));
     ui->scrollArea->widget()->setLayout(ui->verticalLayout);
 
     QObject::connect(ui->b_label0, SIGNAL(clicked()), this, SLOT(AssociateLabel()));
@@ -110,12 +110,12 @@ void MainWindow::InitImageFrame()
 
     forward = new QCommandLinkButton(this);
     forward->setGeometry(580,860,53,57);
-    forward->setIcon(QPixmap("./Assets/go-next.svg"));
+    forward->setIcon(QPixmap("./Assets/go-next.png"));
     forward->setIconSize(QSize(40,40));
 
     backward = new QCommandLinkButton(this);
     backward->setGeometry(460,860,53,57);
-    backward->setIcon(QPixmap("./Assets/go-previous.svg"));
+    backward->setIcon(QPixmap("./Assets/go-previous.png"));
     backward->setIconSize(QSize(40,40));
 }
 
@@ -508,7 +508,7 @@ void MainWindow::LoadProject(QString path)
     while(dir->hasNext())
     {
         QFileInfo fi = dir->fileInfo();
-        if(fi.fileName() == "projdata.dat" || fi.fileName() == "labels.txt")
+        if(fi.fileName() == "projdata" || fi.fileName() == "labels")
             isProj = true;
         dir->next();
     }
