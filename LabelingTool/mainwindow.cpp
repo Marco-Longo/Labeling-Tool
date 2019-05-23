@@ -508,7 +508,7 @@ void MainWindow::LoadProject(QString path)
     while(dir->hasNext())
     {
         QFileInfo fi = dir->fileInfo();
-        if(fi.fileName() == "projdata" || fi.fileName() == "labels")
+        if(fi.fileName() == "projdata.dat" || fi.fileName() == "labels.dat")
             isProj = true;
         dir->next();
     }
