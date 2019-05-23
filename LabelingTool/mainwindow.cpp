@@ -41,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QObject::connect(dirSelectButton, SIGNAL(clicked()), dirSelectDialog, SLOT(open()));
     QObject::connect(dirSelectDialog, SIGNAL(fileSelected(QString)), this, SLOT(SelectDir(QString)));
 
+    projectPath = "";
+    projectJob = "";
     images = new QLinkedList<Image>();
     InitImageFrame();
     QObject::connect(forward, SIGNAL(clicked()), this, SLOT(NextImage()));
@@ -321,6 +323,7 @@ void MainWindow::CreateNewProject()
         ui->actionSave_Project->setEnabled(true);
         ui->actionFinalize_Project->setEnabled(true);
         this->setWindowTitle("LabelingTool  -  " + projectPath);
+        ui->actionLoad_Project->setEnabled(false);
     }
 }
 
@@ -496,13 +499,8 @@ void MainWindow::LoadProject(QString path)
 {
     if(path == "")
         return;
-    if(projectPath != "")
-    {
-        ErrorMsg("Please close the client and restart it to load another project");
-        return;
-    }
-
     projectPath = path;
+    /*
     QDirIterator *dir = new QDirIterator(projectPath, QDirIterator::Subdirectories);
     bool isProj = false;
     while(dir->hasNext())
@@ -517,7 +515,7 @@ void MainWindow::LoadProject(QString path)
         ErrorMsg("The directory you selected is invalid");
         return;
     }
-
+    */
     this->setWindowTitle("LabelingTool  -  " + projectPath);
     QString filename = projectPath + "/projdata.dat";
     QFile file(filename);
@@ -571,6 +569,7 @@ void MainWindow::SingleLoading()
     ui->actionFinalize_Project->setEnabled(true);
     ui->actionSave_Project->setEnabled(true);
     delete dataInputStream;
+    ui->actionLoad_Project->setEnabled(false);
 }
 
 void MainWindow::LoadLabelButtons(QVector<QString>* buttons)
@@ -817,6 +816,7 @@ void MainWindow::MultiLoading()
     ui->actionFinalize_Project->setEnabled(true);
     ui->actionSave_Project->setEnabled(true);
     delete dataInputStream;
+    ui->actionLoad_Project->setEnabled(false);
 }
 
 void MainWindow::LoadMultiLabelButtons(QVector<QString> *checkboxes)
